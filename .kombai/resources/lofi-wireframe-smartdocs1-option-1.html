@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SmartDocs AI – Option 1: Classic Sidebar Navigator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive; background: #f5f5f5; color: #333; height: 100vh; display: flex; flex-direction: column; }
+  .wf-badge-new  { position:absolute; top:-10px; right:-6px; background:#FF9800; color:#fff; font-size:10px; font-family:Arial,sans-serif; font-weight:bold; padding:2px 6px; border-radius:3px; z-index:20; white-space:nowrap; }
+  .wf-badge-reuse{ position:absolute; top:-10px; right:-6px; background:#4CAF50; color:#fff; font-size:10px; font-family:Arial,sans-serif; font-weight:bold; padding:2px 6px; border-radius:3px; z-index:20; white-space:nowrap; }
+  .rel { position: relative; }
+
+  /* ── TOP HEADER ── */
+  .app-header { background:#fff; border-bottom:2px solid #333; padding:10px 16px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .app-logo { font-size:18px; font-weight:bold; border:2px solid #333; padding:4px 10px; background:#f5f5f5; }
+  .header-tag { font-size:11px; color:#666; border:1px dashed #999; padding:2px 8px; }
+
+  /* ── MAIN LAYOUT ── */
+  .app-body { display:flex; flex:1; overflow:hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width:240px; border-right:2px solid #333; background:#fff; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+  .sidebar-section { padding:12px; border-bottom:1px solid #ccc; }
+  .sidebar-label { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#666; margin-bottom:8px; }
+
+  /* upload btn */
+  .upload-btn { display:block; width:100%; padding:9px; border:2px dashed #333; background:#f5f5f5; text-align:center; font-family:inherit; font-size:13px; cursor:pointer; }
+  .upload-btn:hover { background:#eee; }
+
+  /* doc item */
+  .doc-item { padding:8px 10px; border:1px solid #ccc; background:#fafafa; margin-bottom:6px; position:relative; }
+  .doc-item:last-child { margin-bottom:0; }
+  .doc-name { font-size:13px; font-weight:bold; display:flex; align-items:center; gap:6px; }
+  .doc-icon { font-size:16px; }
+  .doc-meta { font-size:11px; color:#666; margin-top:3px; }
+  .doc-status { display:inline-block; font-size:10px; background:#ddd; padding:1px 5px; margin-top:3px; }
+
+  .nav-item { padding:9px 10px; border:1px solid transparent; margin-bottom:4px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; }
+  .nav-item:hover { background:#f0f0f0; border-color:#ccc; }
+  .nav-item.active { background:#eee; border-color:#999; font-weight:bold; }
+
+  /* ── CHAT AREA ── */
+  .chat-area { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#fff; }
+  .chat-topbar { border-bottom:1px solid #ccc; padding:10px 16px; font-size:13px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .chat-context { background:#f5f5f5; border:1px dashed #999; padding:4px 10px; font-size:12px; color:#555; }
+
+  .chat-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px; }
+  .msg { max-width:72%; position:relative; }
+  .msg-user { align-self:flex-end; }
+  .msg-ai { align-self:flex-start; }
+  .msg-bubble { padding:10px 14px; border:2px solid #333; font-size:13px; line-height:1.5; }
+  .msg-user .msg-bubble { background:#f0f0f0; }
+  .msg-ai   .msg-bubble { background:#fff; }
+  .msg-sender { font-size:11px; color:#666; margin-bottom:4px; }
+  .msg-user .msg-sender { text-align:right; }
+  .msg-source { font-size:11px; color:#888; border:1px dashed #ccc; padding:3px 8px; margin-top:5px; display:inline-block; }
+
+  .chat-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:#999; font-size:14px; }
+  .empty-box { border:2px dashed #ccc; padding:24px 40px; text-align:center; }
+
+  .chat-input-row { border-top:2px solid #333; padding:12px 16px; display:flex; gap:8px; flex-shrink:0; background:#fafafa; }
+  .chat-input { flex:1; padding:10px 12px; border:2px solid #333; font-family:inherit; font-size:13px; background:#fff; }
+  .chat-send { padding:10px 18px; border:2px solid #333; background:#333; color:#fff; font-family:inherit; font-size:13px; cursor:pointer; }
+
+  /* ── LEGEND ── */
+  .legend { background:#fff; border-top:1px solid #ccc; padding:8px 16px; display:flex; gap:16px; font-size:11px; align-items:center; flex-shrink:0; }
+  .legend-dot { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; }
+
+  /* annotation */
+  .annotation { font-size:11px; color:#888; font-style:italic; border-left:3px solid #ccc; padding-left:6px; margin-top:6px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ OPTION LABEL ═══════════════════════════ -->
+<div style="background:#333;color:#fff;padding:8px 16px;font-size:12px;font-family:Arial,sans-serif;display:flex;justify-content:space-between;align-items:center;">
+  <span>📐 SmartDocs AI — Wireframe Option 1: <strong>Classic Sidebar Navigator</strong></span>
+  <span style="opacity:.7;">Mid-Fidelity · Grayscale · Balsamiq Style</span>
+</div>
+
+<!-- ═══════════════════════════════ APP HEADER ═══════════════════════════ -->
+<!-- NEW COMPONENT: AppHeader (src/components/layout/AppHeader.tsx) -->
+<div class="app-header rel">
+  <span class="wf-badge-new" title="src/components/layout/AppHeader.tsx">[NEW] AppHeader</span>
+  <div class="app-logo">📚 SmartDocs AI</div>
+  <div class="header-tag">Beta</div>
+  <div style="margin-left:auto;display:flex;gap:10px;font-size:13px;">
+    <span style="border:1px solid #ccc;padding:3px 10px;">⚙ Settings</span>
+    <span style="border:1px solid #ccc;padding:3px 10px;">👤 Account</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MAIN LAYOUT ═══════════════════════════ -->
+<div class="app-body">
+
+  <!-- ── SIDEBAR ── -->
+  <!-- NEW COMPONENT: DocumentSidebar (src/components/layout/DocumentSidebar.tsx) -->
+  <div class="sidebar rel">
+    <span class="wf-badge-new" style="top:4px;right:4px;" title="src/components/layout/DocumentSidebar.tsx">[NEW] DocumentSidebar</span>
+
+    <!-- Upload -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">📁 Upload</div>
+      <!-- NEW COMPONENT: UploadButton (src/components/UploadButton.tsx) -->
+      <div class="rel">
+        <span class="wf-badge-new" title="src/components/UploadButton.tsx">[NEW] UploadButton</span>
+        <button class="upload-btn">＋ Upload PDF Document</button>
+      </div>
+      <div class="annotation">Accepts .pdf · Max 25MB</div>
+    </div>
+
+    <!-- Document List -->
+    <div class="sidebar-section" style="flex:1;">
+      <div class="sidebar-label">📄 Documents (3)</div>
+
+      <!-- NEW COMPONENT: DocumentListItem (src/components/DocumentListItem.tsx) -->
+      <div class="rel">
+        <span class="wf-badge-new" style="top:0;right:0;font-size:9px;" title="src/components/DocumentListItem.tsx">[NEW] DocItem</span>
+        <div class="doc-item">
+          <div class="doc-name"><span class="doc-icon">📄</span>CMPS441_Week1.pdf</div>
+          <div class="doc-meta">12 chunks · 384 dimensions</div>
+          <div class="doc-status">✓ Indexed</div>
+        </div>
+      </div>
+      <div class="rel">
+        <div class="doc-item">
+          <div class="doc-name"><span class="doc-icon">📄</span>CMPS441_Week2.pdf</div>
+          <div class="doc-meta">9 chunks · 384 dimensions</div>
+          <div class="doc-status">✓ Indexed</div>
+        </div>
+      </div>
+      <div class="rel">
+        <div class="doc-item">
+          <div class="doc-name"><span class="doc-icon">📄</span>Hage_Chehade_CV.pdf</div>
+          <div class="doc-meta">5 chunks · 384 dimensions</div>
+          <div class="doc-status">✓ Indexed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active">💬 Chat</div>
+      <div class="nav-item">📊 Document Stats</div>
+      <div class="nav-item">⚙ Settings</div>
+    </div>
+  </div>
+
+  <!-- ── CHAT AREA ── -->
+  <!-- NEW COMPONENT: ChatInterface (src/components/ChatInterface.tsx) -->
+  <div class="chat-area rel">
+    <span class="wf-badge-new" style="top:4px;right:4px;" title="src/components/ChatInterface.tsx">[NEW] ChatInterface</span>
+
+    <!-- Top Bar: context -->
+    <div class="chat-topbar">
+      <span style="font-size:12px;color:#555;">Querying:</span>
+      <div class="chat-context">All 3 documents</div>
+      <span style="font-size:12px;color:#aaa;margin-left:auto;">Powered by all-MiniLM-L6-v2 + OpenAI</span>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages">
+
+      <!-- AI welcome -->
+      <!-- NEW COMPONENT: ChatMessage (src/components/ChatMessage.tsx) -->
+      <div class="msg msg-ai rel">
+        <span class="wf-badge-new" style="top:0;right:-50px;font-size:9px;" title="src/components/ChatMessage.tsx">[NEW] ChatMessage</span>
+        <div class="msg-sender">🤖 SmartDocs AI</div>
+        <div class="msg-bubble">
+          Hello! I have indexed <strong>3 documents</strong> and I'm ready to answer your questions. What would you like to know?
+        </div>
+      </div>
+
+      <!-- User message -->
+      <div class="msg msg-user">
+        <div class="msg-sender">You</div>
+        <div class="msg-bubble">What sorting algorithms are covered in Week 2?</div>
+      </div>
+
+      <!-- AI reply with source -->
+      <div class="msg msg-ai">
+        <div class="msg-sender">🤖 SmartDocs AI</div>
+        <div class="msg-bubble">
+          Based on <em>CMPS441_Week2.pdf</em>, the document covers:<br><br>
+          • <strong>Bubble Sort</strong> — O(n²) time complexity<br>
+          • <strong>Merge Sort</strong> — O(n log n) time complexity<br>
+          • <strong>Quick Sort</strong> — Average O(n log n)<br><br>
+          Growth functions and asymptotic notation are also discussed.
+        </div>
+        <!-- NEW COMPONENT: SourceCitation (src/components/SourceCitation.tsx) -->
+        <div class="rel" style="margin-top:6px;">
+          <span class="wf-badge-new" style="top:0;right:0;font-size:9px;" title="src/components/SourceCitation.tsx">[NEW] SourceCitation</span>
+          <div class="msg-source">📎 Source: CMPS441_Week2.pdf · Chunks 3, 5, 7</div>
+        </div>
+      </div>
+
+      <!-- User message 2 -->
+      <div class="msg msg-user">
+        <div class="msg-sender">You</div>
+        <div class="msg-bubble">Summarize the candidate's experience from the CV</div>
+      </div>
+
+      <!-- AI reply 2 -->
+      <div class="msg msg-ai">
+        <div class="msg-sender">🤖 SmartDocs AI</div>
+        <div class="msg-bubble">
+          From <em>Hage_Chehade_CV.pdf</em>:<br><br>
+          Mohamad Hage Chehade has experience in software development with a focus on backend and AI systems…<br>
+          <span style="color:#999;font-size:12px;">[Response continues…]</span>
+        </div>
+        <div class="msg-source">📎 Source: Hage_Chehade_CV.pdf · Chunks 1, 2</div>
+      </div>
+
+    </div>
+
+    <!-- Input Row -->
+    <!-- NEW COMPONENT: ChatInput (src/components/ChatInput.tsx) -->
+    <div class="chat-input-row rel">
+      <span class="wf-badge-new" style="top:-4px;right:4px;" title="src/components/ChatInput.tsx">[NEW] ChatInput</span>
+      <input class="chat-input" type="text" placeholder="Ask a question about your documents…" />
+      <button class="chat-send">Send ↵</button>
+    </div>
+  </div>
+
+</div><!-- /app-body -->
+
+<!-- ══════════════════════════════ LEGEND ══════════════════════════════ -->
+<div class="legend">
+  <strong>Components:</strong>
+  <span><span class="legend-dot" style="background:#FF9800;"></span>[NEW] = New component to build</span>
+  <span><span class="legend-dot" style="background:#4CAF50;"></span>[REUSE] = Existing component</span>
+  <span style="margin-left:auto;color:#888;">Option 1 / 3 — shadcn + React + Vite + Tailwind v4</span>
+</div>
+
+</body>
+</html>

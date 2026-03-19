@@ -256,8 +256,10 @@ def delete_document(filename: str):
 async def upload_file(file: UploadFile = File(...)):
     global index, stored_chunks, chunk_metadata, uploaded_docs, doc_hashes
     try:
-        if not file.filename.lower().endswith(".pdf"):
+        safe_name = Path(file.filename).name  # strip any directory components
+        if not safe_name.lower().endswith(".pdf"):
             raise HTTPException(status_code=415, detail="Only PDF files are supported.")
+        file.filename = safe_name
 
         contents = await file.read()
 

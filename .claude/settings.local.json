@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"AI SaaS document chat RAG professional\" --design-system -p \"SmartDocs AI\")",
+      "Bash(python3 skills/ui-ux-pro-max/scripts/search.py \"AI SaaS document chat RAG professional\" --design-system -p \"SmartDocs AI\")",
+      "Bash(python:*)"
+    ]
+  }
+}

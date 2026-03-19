@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SmartDocs AI – Option 3: AI-First Chat Interface</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive; background: #f0f0f0; color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  .wf-badge-new  { position:absolute; background:#FF9800; color:#fff; font-size:10px; font-family:Arial,sans-serif; font-weight:bold; padding:2px 6px; border-radius:3px; z-index:20; white-space:nowrap; top:-10px; right:-6px; }
+  .rel { position: relative; }
+
+  /* ── SLIM HEADER ── */
+  .slim-header { background:#fff; border-bottom:2px solid #333; padding:8px 20px; display:flex; align-items:center; height:48px; flex-shrink:0; }
+  .logo-text { font-size:16px; font-weight:bold; }
+  .logo-sub { font-size:11px; color:#888; margin-left:8px; }
+
+  .header-right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .doc-tray-btn { border:2px solid #333; padding:5px 12px; font-family:inherit; font-size:12px; cursor:pointer; background:#f5f5f5; display:flex; align-items:center; gap:6px; }
+  .doc-count { background:#333; color:#fff; border-radius:8px; padding:1px 6px; font-size:10px; font-family:Arial,sans-serif; }
+  .header-icon-btn { border:1px solid #ccc; padding:5px 10px; font-size:13px; cursor:pointer; background:#fff; }
+
+  /* ── LAYOUT: sidebar + main ── */
+  .app-body { flex:1; display:flex; overflow:hidden; position:relative; }
+
+  /* ── COLLAPSIBLE DOC TRAY (left) ── */
+  .doc-tray { width:300px; background:#fff; border-right:2px solid #333; display:flex; flex-direction:column; transition:width 0.2s; flex-shrink:0; }
+  .doc-tray.collapsed { width:0; overflow:hidden; border:none; }
+  .tray-header { padding:12px 14px; border-bottom:1px solid #ccc; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+  .tray-title { font-size:13px; font-weight:bold; }
+  .tray-close { border:none; background:none; font-size:16px; cursor:pointer; color:#666; }
+
+  /* upload area in tray */
+  .tray-upload { margin:10px; border:2px dashed #bbb; padding:14px; text-align:center; background:#fafafa; font-size:12px; color:#777; }
+  .tray-upload-icon { font-size:22px; display:block; margin-bottom:4px; }
+  .tray-upload-link { text-decoration:underline; cursor:pointer; }
+
+  /* history/doc list */
+  .tray-list { flex:1; overflow-y:auto; }
+  .tray-section-label { font-size:10px; text-transform:uppercase; color:#aaa; letter-spacing:1px; padding:8px 12px 4px; border-top:1px solid #f0f0f0; }
+  .tray-doc { padding:8px 12px; border-bottom:1px solid #f0f0f0; cursor:pointer; display:flex; gap:8px; align-items:flex-start; }
+  .tray-doc:hover { background:#f9f9f9; }
+  .tray-doc-icon { font-size:18px; flex-shrink:0; margin-top:2px; }
+  .tray-doc-info { flex:1; min-width:0; }
+  .tray-doc-name { font-size:12px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tray-doc-meta { font-size:10px; color:#999; display:flex; gap:6px; margin-top:2px; }
+  .tray-doc-tag { background:#eee; padding:1px 5px; font-family:Arial,sans-serif; }
+
+  /* ── CHAT MAIN ── */
+  .chat-main { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#f7f7f7; }
+
+  /* hero empty state */
+  .hero-empty { flex:1; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; display:none; }
+  .hero-logo { font-size:48px; margin-bottom:12px; }
+  .hero-title { font-size:22px; font-weight:bold; margin-bottom:8px; }
+  .hero-subtitle { font-size:14px; color:#888; max-width:400px; text-align:center; margin-bottom:28px; }
+  .hero-suggestions { display:grid; grid-template-columns:1fr 1fr; gap:8px; max-width:500px; width:100%; }
+  .suggestion-card { border:2px solid #ccc; padding:10px 14px; background:#fff; cursor:pointer; font-size:12px; }
+  .suggestion-card:hover { border-color:#333; }
+  .suggestion-label { font-size:10px; color:#888; margin-bottom:3px; }
+
+  /* messages */
+  .chat-scroll { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+  .chat-width-limit { max-width:720px; width:100%; margin:0 auto; }
+  .msg-group { display:flex; flex-direction:column; gap:4px; }
+  .msg-role { font-size:11px; color:#888; display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+  .role-avatar { width:22px; height:22px; border:2px solid #333; display:flex; align-items:center; justify-content:center; font-size:12px; background:#eee; flex-shrink:0; }
+  .msg-text { font-size:13px; line-height:1.6; padding:12px 16px; border:2px solid #ddd; background:#fff; }
+  .msg-user-wrap { align-items:flex-end; }
+  .msg-user .msg-text { background:#efefef; border-color:#bbb; }
+
+  /* sources section */
+  .sources-section { margin-top:8px; }
+  .sources-label { font-size:11px; color:#888; margin-bottom:5px; }
+  .sources-grid { display:flex; gap:6px; flex-wrap:wrap; }
+  .source-card { border:1px solid #ccc; padding:5px 10px; background:#f9f9f9; font-size:11px; cursor:pointer; }
+  .source-card:hover { border-color:#333; }
+  .source-card-num { color:#888; margin-right:4px; }
+
+  /* suggested follow-ups */
+  .followups { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .followup-btn { border:1px dashed #999; padding:5px 10px; font-size:11px; cursor:pointer; background:#fff; font-family:inherit; }
+  .followup-btn:hover { background:#f0f0f0; border-style:solid; }
+
+  /* ── SMART INPUT ── */
+  .smart-input-wrap { padding:12px 20px 16px; flex-shrink:0; border-top:1px solid #ddd; background:#f7f7f7; }
+  .smart-input-inner { max-width:720px; margin:0 auto; }
+  .input-box { border:2px solid #333; background:#fff; display:flex; align-items:flex-end; gap:0; }
+  .input-box textarea { flex:1; border:none; outline:none; padding:12px 14px; font-family:inherit; font-size:13px; resize:none; min-height:46px; background:transparent; }
+  .input-box-actions { display:flex; align-items:center; gap:4px; padding:8px; flex-shrink:0; }
+  .icon-btn { border:1px solid #ccc; padding:6px 10px; font-size:13px; background:#f5f5f5; cursor:pointer; }
+  .send-btn { border:2px solid #333; padding:7px 16px; background:#333; color:#fff; font-family:inherit; font-size:13px; cursor:pointer; }
+  .input-meta { display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:#aaa; }
+
+  /* annotation */
+  .annotation { font-size:11px; color:#888; font-style:italic; border-left:3px solid #ccc; padding-left:6px; }
+
+  /* legend */
+  .legend { background:#fff; border-top:1px solid #ccc; padding:7px 16px; display:flex; gap:14px; font-size:11px; align-items:center; flex-shrink:0; }
+  .legend-dot { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; }
+</style>
+</head>
+<body>
+
+<!-- OPTION BANNER -->
+<div style="background:#777;color:#fff;padding:8px 16px;font-size:12px;font-family:Arial,sans-serif;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+  <span>📐 SmartDocs AI — Wireframe Option 3: <strong>AI-First Chat Interface</strong></span>
+  <span style="opacity:.7;">Mid-Fidelity · Grayscale · Balsamiq Style</span>
+</div>
+
+<!-- ══════════════════════════════════════ SLIM HEADER ══════════════════════════════════════ -->
+<!-- NEW COMPONENT: SlimHeader (src/components/layout/SlimHeader.tsx) -->
+<div class="slim-header rel">
+  <span class="wf-badge-new" style="top:4px;right:4px;" title="src/components/layout/SlimHeader.tsx">[NEW] SlimHeader</span>
+  <span class="logo-text">📚 SmartDocs AI</span>
+  <span class="logo-sub">Powered by FAISS + OpenAI</span>
+  <div class="header-right">
+    <!-- NEW COMPONENT: DocumentTrayButton (src/components/DocumentTrayButton.tsx) -->
+    <div class="rel">
+      <span class="wf-badge-new" style="top:-2px;right:-4px;font-size:9px;" title="src/components/DocumentTrayButton.tsx">[NEW] TrayBtn</span>
+      <button class="doc-tray-btn">📁 My Documents <span class="doc-count">3</span></button>
+    </div>
+    <button class="header-icon-btn">⚙</button>
+    <button class="header-icon-btn">☾</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ BODY ══════════════════════════════════════ -->
+<div class="app-body">
+
+  <!-- ═════════ LEFT: COLLAPSIBLE DOCUMENT TRAY ═════════ -->
+  <!-- NEW COMPONENT: DocumentTray (src/components/panels/DocumentTray.tsx) -->
+  <div class="doc-tray rel">
+    <span class="wf-badge-new" style="top:4px;right:4px;" title="src/components/panels/DocumentTray.tsx">[NEW] DocTray</span>
+    <div class="tray-header">
+      <span class="tray-title">📁 Documents</span>
+      <button class="tray-close" title="Collapse">← Hide</button>
+    </div>
+
+    <!-- Upload -->
+    <!-- NEW COMPONENT: InlineDrop (src/components/InlineDrop.tsx) -->
+    <div class="rel">
+      <span class="wf-badge-new" style="top:12px;right:4px;font-size:9px;" title="src/components/InlineDrop.tsx">[NEW] InlineDrop</span>
+      <div class="tray-upload">
+        <span class="tray-upload-icon">＋</span>
+        Drop a PDF or <span class="tray-upload-link">click to upload</span>
+      </div>
+    </div>
+
+    <!-- Doc list -->
+    <div class="tray-list">
+      <div class="tray-section-label">Uploaded (3)</div>
+
+      <!-- NEW COMPONENT: TrayDocItem (src/components/TrayDocItem.tsx) -->
+      <div class="rel">
+        <span class="wf-badge-new" style="top:0;right:0;font-size:9px;" title="src/components/TrayDocItem.tsx">[NEW] TrayDocItem</span>
+        <div class="tray-doc">
+          <span class="tray-doc-icon">📄</span>
+          <div class="tray-doc-info">
+            <div class="tray-doc-name">CMPS441_Week1_Introduction.pdf</div>
+            <div class="tray-doc-meta">
+              <span class="tray-doc-tag">12 chunks</span>
+              <span class="tray-doc-tag">✓ Indexed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tray-doc">
+        <span class="tray-doc-icon">📄</span>
+        <div class="tray-doc-info">
+          <div class="tray-doc-name">CMPS441_Week2_sort_growth.pdf</div>
+          <div class="tray-doc-meta">
+            <span class="tray-doc-tag">9 chunks</span>
+            <span class="tray-doc-tag">✓ Indexed</span>
+          </div>
+        </div>
+      </div>
+      <div class="tray-doc">
+        <span class="tray-doc-icon">📄</span>
+        <div class="tray-doc-info">
+          <div class="tray-doc-name">Mohamad_Hage_Chehade_CV.pdf</div>
+          <div class="tray-doc-meta">
+            <span class="tray-doc-tag">5 chunks</span>
+            <span class="tray-doc-tag">✓ Indexed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tray-section-label">Conversations</div>
+      <div class="tray-doc" style="background:#f0f0f0;">
+        <span class="tray-doc-icon">💬</span>
+        <div class="tray-doc-info">
+          <div class="tray-doc-name" style="font-weight:normal;">Sorting algorithms in Week 2</div>
+          <div class="tray-doc-meta"><span>Today 2:31 PM</span></div>
+        </div>
+      </div>
+      <div class="tray-doc">
+        <span class="tray-doc-icon">💬</span>
+        <div class="tray-doc-info">
+          <div class="tray-doc-name" style="font-weight:normal;">CV Education &amp; Skills</div>
+          <div class="tray-doc-meta"><span>Yesterday</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:8px 12px;border-top:1px solid #eee;font-size:11px;color:#aaa;flex-shrink:0;background:#fafafa;">
+      FAISS · 26 vectors · 384 dims
+    </div>
+  </div>
+
+  <!-- ═════════ RIGHT: CHAT MAIN ═════════ -->
+  <!-- NEW COMPONENT: AIChatMain (src/components/AIChatMain.tsx) -->
+  <div class="chat-main rel">
+    <span class="wf-badge-new" style="top:4px;right:4px;" title="src/components/AIChatMain.tsx">[NEW] AIChatMain</span>
+
+    <!-- Messages -->
+    <div class="chat-scroll">
+      <div class="chat-width-limit">
+
+        <!-- System greeting -->
+        <!-- NEW COMPONENT: WelcomeBanner (src/components/WelcomeBanner.tsx) -->
+        <div class="rel" style="text-align:center;padding:24px 0 16px;">
+          <span class="wf-badge-new" style="top:4px;right:0;" title="src/components/WelcomeBanner.tsx">[NEW] WelcomeBanner</span>
+          <div style="font-size:32px;margin-bottom:8px;">🤖</div>
+          <div style="font-size:16px;font-weight:bold;margin-bottom:4px;">SmartDocs AI</div>
+          <div style="font-size:13px;color:#888;margin-bottom:16px;">3 documents indexed · Ask anything</div>
+          <!-- Suggested questions -->
+          <!-- NEW COMPONENT: SuggestionChips (src/components/SuggestionChips.tsx) -->
+          <div class="rel" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+            <span class="wf-badge-new" style="top:-10px;left:0;" title="src/components/SuggestionChips.tsx">[NEW] SuggestionChips</span>
+            <button class="followup-btn">📖 Summarize Week 1 lecture</button>
+            <button class="followup-btn">📊 What sorting algorithms are covered?</button>
+            <button class="followup-btn">👤 What's the candidate's background?</button>
+            <button class="followup-btn">🔗 Compare Week 1 and Week 2</button>
+          </div>
+        </div>
+
+        <!-- AI message -->
+        <!-- NEW COMPONENT: AIMessage (src/components/AIMessage.tsx) -->
+        <div class="msg-group rel" style="margin-bottom:4px;">
+          <span class="wf-badge-new" style="top:0;right:0;font-size:9px;" title="src/components/AIMessage.tsx">[NEW] AIMessage</span>
+          <div class="msg-role">
+            <div class="role-avatar">🤖</div>
+            <span>SmartDocs AI</span>
+            <span style="color:#bbb;">· just now</span>
+          </div>
+          <div class="msg-text">
+            Hello! I've successfully indexed <strong>3 documents</strong> (26 total vectors). I'm ready to answer questions across all of them — or you can ask about a specific document. What would you like to know?
+          </div>
+        </div>
+
+        <!-- User message -->
+        <!-- NEW COMPONENT: UserMessage (src/components/UserMessage.tsx) -->
+        <div class="msg-group msg-user-wrap rel" style="align-items:flex-end;margin-bottom:4px;">
+          <span class="wf-badge-new" style="top:0;right:0;font-size:9px;" title="src/components/UserMessage.tsx">[NEW] UserMessage</span>
+          <div class="msg-role" style="justify-content:flex-end;">
+            <span style="color:#bbb;">2:31 PM ·</span>
+            <span>You</span>
+            <div class="role-avatar">👤</div>
+          </div>
+          <div class="msg-user">
+            <div class="msg-text">What sorting algorithms are covered in Week 2 and what are their time complexities?</div>
+          </div>
+        </div>
+
+        <!-- AI long reply -->
+        <div class="msg-group" style="margin-bottom:4px;">
+          <div class="msg-role">
+            <div class="role-avatar">🤖</div>
+            <span>SmartDocs AI</span>
+            <span style="color:#bbb;">· 2:31 PM</span>
+          </div>
+          <div class="msg-text">
+            According to <em>CMPS441_Week2_sort_growth.pdf</em>, the following sorting algorithms are covered:<br><br>
+            <strong>1. Bubble Sort</strong><br>
+            &nbsp;&nbsp;&nbsp;• Time: O(n²) worst/average case<br>
+            &nbsp;&nbsp;&nbsp;• Space: O(1) in-place<br><br>
+            <strong>2. Insertion Sort</strong><br>
+            &nbsp;&nbsp;&nbsp;• Time: O(n²) worst, O(n) best<br>
+            &nbsp;&nbsp;&nbsp;• Space: O(1) in-place<br><br>
+            <strong>3. Merge Sort</strong><br>
+            &nbsp;&nbsp;&nbsp;• Time: O(n log n) all cases<br>
+            &nbsp;&nbsp;&nbsp;• Space: O(n) auxiliary<br><br>
+            <strong>4. Quick Sort</strong><br>
+            &nbsp;&nbsp;&nbsp;• Time: O(n log n) average, O(n²) worst<br>
+            &nbsp;&nbsp;&nbsp;• Space: O(log n) average<br><br>
+            The document also introduces <strong>asymptotic notation</strong> (Big-O, Theta, Omega) and discusses growth rates.
+          </div>
+
+          <!-- Sources -->
+          <!-- NEW COMPONENT: SourceReferences (src/components/SourceReferences.tsx) -->
+          <div class="rel">
+            <span class="wf-badge-new" style="top:-4px;right:0;font-size:9px;" title="src/components/SourceReferences.tsx">[NEW] SourceRefs</span>
+            <div class="sources-section">
+              <div class="sources-label">📎 Referenced chunks:</div>
+              <div class="sources-grid">
+                <div class="source-card"><span class="source-card-num">[1]</span>Week2.pdf · chunk 3</div>
+                <div class="source-card"><span class="source-card-num">[2]</span>Week2.pdf · chunk 5</div>
+                <div class="source-card"><span class="source-card-num">[3]</span>Week2.pdf · chunk 7</div>
+                <div class="source-card"><span class="source-card-num">[4]</span>Week2.pdf · chunk 8</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Follow-up suggestions -->
+          <!-- NEW COMPONENT: FollowUpSuggestions (src/components/FollowUpSuggestions.tsx) -->
+          <div class="rel">
+            <span class="wf-badge-new" style="top:-4px;right:0;font-size:9px;" title="src/components/FollowUpSuggestions.tsx">[NEW] Followups</span>
+            <div class="followups" style="margin-top:8px;">
+              <div style="font-size:11px;color:#aaa;width:100%;margin-bottom:2px;">Suggested follow-ups:</div>
+              <button class="followup-btn">Compare with Week 1 topics</button>
+              <button class="followup-btn">Which is fastest in practice?</button>
+              <button class="followup-btn">Explain Big-O notation</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /chat-width-limit -->
+    </div><!-- /chat-scroll -->
+
+    <!-- ═════════ SMART INPUT ═════════ -->
+    <!-- NEW COMPONENT: SmartInput (src/components/SmartInput.tsx) -->
+    <div class="smart-input-wrap rel">
+      <span class="wf-badge-new" style="top:4px;right:20px;" title="src/components/SmartInput.tsx">[NEW] SmartInput</span>
+      <div class="smart-input-inner">
+        <div class="input-box">
+          <textarea rows="2" placeholder="Ask anything… or drag &amp; drop a PDF here to upload"></textarea>
+          <div class="input-box-actions">
+            <button class="icon-btn" title="Upload PDF">📎</button>
+            <button class="icon-btn" title="Voice input">🎤</button>
+            <button class="send-btn">↑ Send</button>
+          </div>
+        </div>
+        <div class="input-meta">
+          <span>Enter to send · Shift+Enter for newline</span>
+          <span>Querying: <strong>All 3 docs</strong> · Model: gpt-4o-mini</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /chat-main -->
+</div><!-- /app-body -->
+
+<!-- LEGEND -->
+<div class="legend" style="flex-shrink:0;">
+  <strong>Components:</strong>
+  <span><span class="legend-dot" style="background:#FF9800;"></span>[NEW] = New component to build</span>
+  <span><span class="legend-dot" style="background:#4CAF50;"></span>[REUSE] = Existing component</span>
+  <span style="margin-left:auto;color:#888;">Option 3 / 3 — shadcn + React + Vite + Tailwind v4</span>
+</div>
+
+</body>
+</html>

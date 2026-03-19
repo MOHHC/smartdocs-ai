@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SmartDocs AI – Option 2: Dual Panel Workspace</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive; background: #f5f5f5; color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  .wf-badge-new  { position:absolute; background:#FF9800; color:#fff; font-size:10px; font-family:Arial,sans-serif; font-weight:bold; padding:2px 6px; border-radius:3px; z-index:20; white-space:nowrap; top:-10px; right:-6px; }
+  .wf-badge-reuse{ position:absolute; background:#4CAF50; color:#fff; font-size:10px; font-family:Arial,sans-serif; font-weight:bold; padding:2px 6px; border-radius:3px; z-index:20; white-space:nowrap; top:-10px; right:-6px; }
+  .rel { position: relative; }
+
+  /* ── TOP NAV ── */
+  .top-nav { background:#fff; border-bottom:2px solid #333; display:flex; align-items:center; padding:0 16px; height:50px; flex-shrink:0; gap:2px; }
+  .nav-logo { font-size:16px; font-weight:bold; padding:4px 12px; border:2px solid #333; background:#f5f5f5; margin-right:16px; }
+  .nav-tab { padding:8px 16px; border:2px solid transparent; border-bottom:none; font-size:13px; cursor:pointer; height:50px; display:flex; align-items:center; }
+  .nav-tab.active { border-color:#333; border-bottom:2px solid #fff; background:#fff; margin-bottom:-2px; }
+  .nav-tab:hover:not(.active) { background:#f5f5f5; }
+  .nav-right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .nav-btn { padding:5px 12px; border:1px solid #ccc; font-family:inherit; font-size:12px; background:#fff; cursor:pointer; }
+  .theme-toggle { border:2px solid #333; padding:4px 10px; font-size:12px; cursor:pointer; }
+
+  /* ── MAIN CONTENT ── */
+  .main-row { flex:1; display:flex; overflow:hidden; }
+
+  /* ── LEFT PANEL: DOCUMENTS ── */
+  .doc-panel { width:340px; border-right:2px solid #333; background:#fff; display:flex; flex-direction:column; flex-shrink:0; }
+  .panel-header { padding:12px 14px; border-bottom:1px solid #ccc; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+  .panel-title { font-size:14px; font-weight:bold; }
+  .badge-count { background:#333; color:#fff; font-size:11px; padding:1px 7px; border-radius:10px; font-family:Arial,sans-serif; }
+
+  /* dropzone */
+  .dropzone { margin:12px; border:2px dashed #999; padding:18px; text-align:center; background:#fafafa; color:#666; }
+  .dropzone-icon { font-size:28px; display:block; margin-bottom:6px; }
+  .dropzone-text { font-size:12px; }
+  .dropzone-link { text-decoration:underline; cursor:pointer; }
+
+  /* doc cards */
+  .doc-list { flex:1; overflow-y:auto; padding:8px 12px; display:flex; flex-direction:column; gap:8px; }
+  .doc-card { border:1px solid #ccc; padding:10px 12px; background:#fafafa; position:relative; }
+  .doc-card-header { display:flex; align-items:flex-start; gap:8px; }
+  .doc-card-icon { font-size:22px; flex-shrink:0; }
+  .doc-card-info { flex:1; min-width:0; }
+  .doc-card-name { font-size:13px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .doc-card-time { font-size:11px; color:#888; }
+  .doc-card-stats { display:flex; gap:6px; margin-top:6px; }
+  .stat-pill { font-size:10px; border:1px solid #ddd; padding:2px 6px; background:#f0f0f0; font-family:Arial,sans-serif; }
+  .doc-actions { display:flex; gap:4px; margin-top:8px; }
+  .doc-action-btn { font-size:11px; border:1px solid #ccc; padding:3px 8px; background:#fff; cursor:pointer; font-family:inherit; }
+
+  /* ── RIGHT PANEL: CHAT ── */
+  .chat-panel { flex:1; display:flex; flex-direction:column; background:#fff; overflow:hidden; }
+
+  .chat-subbar { padding:8px 14px; border-bottom:1px solid #ccc; display:flex; align-items:center; gap:10px; flex-shrink:0; background:#fafafa; }
+  .filter-chip { border:1px solid #999; padding:3px 10px; font-size:12px; cursor:pointer; background:#fff; }
+  .filter-chip.active { background:#333; color:#fff; border-color:#333; }
+
+  .chat-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+  .msg { max-width:80%; position:relative; }
+  .msg-user { align-self:flex-end; }
+  .msg-ai { align-self:flex-start; }
+  .msg-label { font-size:11px; color:#888; margin-bottom:3px; }
+  .msg-user .msg-label { text-align:right; }
+  .msg-bubble { border:2px solid #333; padding:10px 14px; font-size:13px; line-height:1.5; }
+  .msg-user .msg-bubble { background:#efefef; }
+  .msg-ai   .msg-bubble { background:#fff; }
+  .source-bar { background:#f5f5f5; border:1px dashed #bbb; padding:4px 10px; font-size:11px; color:#666; margin-top:4px; display:flex; gap:6px; align-items:center; }
+  .source-tag { background:#ddd; padding:1px 6px; font-size:10px; font-family:Arial,sans-serif; }
+
+  /* system message */
+  .sys-msg { text-align:center; font-size:12px; color:#888; border:1px dashed #ddd; padding:5px 12px; align-self:center; background:#fafafa; }
+
+  .typing { display:flex; gap:4px; align-items:center; font-size:13px; color:#888; }
+  .typing-dot { width:6px; height:6px; background:#999; border-radius:50%; }
+
+  /* input area */
+  .chat-input-area { border-top:2px solid #333; padding:12px; flex-shrink:0; }
+  .input-row { display:flex; gap:8px; align-items:flex-end; }
+  .chat-textarea { flex:1; border:2px solid #333; padding:10px; font-family:inherit; font-size:13px; resize:none; min-height:42px; }
+  .input-actions { display:flex; gap:6px; }
+  .btn-attach { border:2px solid #333; padding:8px 12px; background:#fff; cursor:pointer; font-family:inherit; font-size:12px; }
+  .btn-send { border:2px solid #333; padding:8px 18px; background:#333; color:#fff; cursor:pointer; font-family:inherit; font-size:13px; }
+  .input-hint { font-size:11px; color:#aaa; margin-top:5px; }
+
+  /* legend */
+  .legend { background:#fff; border-top:1px solid #ccc; padding:7px 16px; display:flex; gap:14px; font-size:11px; align-items:center; flex-shrink:0; }
+  .legend-dot { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; }
+  .annotation { font-size:11px; color:#888; font-style:italic; }
+</style>
+</head>
+<body>
+
+<!-- OPTION BANNER -->
+<div style="background:#555;color:#fff;padding:8px 16px;font-size:12px;font-family:Arial,sans-serif;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+  <span>📐 SmartDocs AI — Wireframe Option 2: <strong>Dual Panel Workspace</strong></span>
+  <span style="opacity:.7;">Mid-Fidelity · Grayscale · Balsamiq Style</span>
+</div>
+
+<!-- ══════════════════════════════════════ TOP NAV ══════════════════════════════════════ -->
+<!-- NEW COMPONENT: TopNavBar (src/components/layout/TopNavBar.tsx) -->
+<div class="top-nav rel">
+  <span class="wf-badge-new" style="top:4px;right:4px;" title="src/components/layout/TopNavBar.tsx">[NEW] TopNavBar</span>
+  <div class="nav-logo">📚 SmartDocs AI</div>
+  <div class="nav-tab active">💬 Chat &amp; Query</div>
+  <div class="nav-tab">📁 Documents</div>
+  <div class="nav-tab">📊 Analytics</div>
+  <div class="nav-tab">⚙ Settings</div>
+  <div class="nav-right">
+    <div class="theme-toggle">☀ / ☾</div>
+    <div class="nav-btn">👤 Account</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ MAIN ROW ══════════════════════════════════════ -->
+<div class="main-row">
+
+  <!-- ═══════════════ LEFT: DOCUMENT PANEL ═══════════════ -->
+  <!-- NEW COMPONENT: DocumentPanel (src/components/panels/DocumentPanel.tsx) -->
+  <div class="doc-panel rel">
+    <span class="wf-badge-new" style="top:4px;right:4px;" title="src/components/panels/DocumentPanel.tsx">[NEW] DocumentPanel</span>
+
+    <div class="panel-header">
+      <span class="panel-title">📁 Documents</span>
+      <span class="badge-count">3</span>
+    </div>
+
+    <!-- Dropzone -->
+    <!-- NEW COMPONENT: DropZone (src/components/DropZone.tsx) -->
+    <div class="rel">
+      <span class="wf-badge-new" style="top:12px;right:0;" title="src/components/DropZone.tsx">[NEW] DropZone</span>
+      <div class="dropzone">
+        <span class="dropzone-icon">📂</span>
+        <div class="dropzone-text">Drag &amp; drop PDF here<br>or <span class="dropzone-link">click to browse</span></div>
+        <div style="font-size:10px;color:#aaa;margin-top:5px;">Max 25MB · PDF only</div>
+      </div>
+    </div>
+
+    <!-- Document Cards -->
+    <div class="doc-list">
+
+      <!-- NEW COMPONENT: DocumentCard (src/components/DocumentCard.tsx) -->
+      <div class="rel">
+        <span class="wf-badge-new" style="top:0;right:0;font-size:9px;" title="src/components/DocumentCard.tsx">[NEW] DocumentCard</span>
+        <div class="doc-card">
+          <div class="doc-card-header">
+            <span class="doc-card-icon">📄</span>
+            <div class="doc-card-info">
+              <div class="doc-card-name">CMPS441_Week1_Introduction.pdf</div>
+              <div class="doc-card-time">Uploaded 2 hours ago</div>
+            </div>
+          </div>
+          <div class="doc-card-stats">
+            <span class="stat-pill">✓ Indexed</span>
+            <span class="stat-pill">12 chunks</span>
+            <span class="stat-pill">384 dims</span>
+          </div>
+          <div class="doc-actions">
+            <button class="doc-action-btn">🔍 Query only this</button>
+            <button class="doc-action-btn">🗑 Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <span class="doc-card-icon">📄</span>
+          <div class="doc-card-info">
+            <div class="doc-card-name">CMPS441_Week2_sort_growth.pdf</div>
+            <div class="doc-card-time">Uploaded 1 hour ago</div>
+          </div>
+        </div>
+        <div class="doc-card-stats">
+          <span class="stat-pill">✓ Indexed</span>
+          <span class="stat-pill">9 chunks</span>
+          <span class="stat-pill">384 dims</span>
+        </div>
+        <div class="doc-actions">
+          <button class="doc-action-btn">🔍 Query only this</button>
+          <button class="doc-action-btn">🗑 Remove</button>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <span class="doc-card-icon">📄</span>
+          <div class="doc-card-info">
+            <div class="doc-card-name">Mohamad_Hage_Chehade_CV.pdf</div>
+            <div class="doc-card-time">Uploaded 30 min ago</div>
+          </div>
+        </div>
+        <div class="doc-card-stats">
+          <span class="stat-pill">✓ Indexed</span>
+          <span class="stat-pill">5 chunks</span>
+          <span class="stat-pill">384 dims</span>
+        </div>
+        <div class="doc-actions">
+          <button class="doc-action-btn">🔍 Query only this</button>
+          <button class="doc-action-btn">🗑 Remove</button>
+        </div>
+      </div>
+
+      <div class="annotation" style="padding:6px;">↑ Click a document to query it individually, or query all at once from the chat</div>
+    </div>
+
+    <!-- Index Status -->
+    <div style="padding:10px 12px;border-top:1px solid #ccc;background:#fafafa;font-size:12px;color:#555;flex-shrink:0;">
+      FAISS Index: <strong>26 vectors total</strong> · all-MiniLM-L6-v2
+    </div>
+  </div>
+
+  <!-- ═══════════════ RIGHT: CHAT PANEL ═══════════════ -->
+  <!-- NEW COMPONENT: ChatPanel (src/components/panels/ChatPanel.tsx) -->
+  <div class="chat-panel rel">
+    <span class="wf-badge-new" style="top:4px;right:4px;" title="src/components/panels/ChatPanel.tsx">[NEW] ChatPanel</span>
+
+    <!-- Sub-bar: scope filter -->
+    <div class="chat-subbar">
+      <span style="font-size:12px;color:#555;">Query scope:</span>
+      <!-- NEW COMPONENT: ScopeFilter (src/components/ScopeFilter.tsx) -->
+      <div class="rel" style="display:flex;gap:4px;">
+        <span class="wf-badge-new" style="top:-10px;left:0;" title="src/components/ScopeFilter.tsx">[NEW] ScopeFilter</span>
+        <div class="filter-chip active">All Documents</div>
+        <div class="filter-chip">Week1.pdf</div>
+        <div class="filter-chip">Week2.pdf</div>
+        <div class="filter-chip">CV.pdf</div>
+      </div>
+      <div style="margin-left:auto;font-size:12px;color:#aaa;">Model: gpt-4o-mini</div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages">
+      <div class="sys-msg">📂 3 documents indexed · Ready to answer questions</div>
+
+      <!-- NEW COMPONENT: ChatMessageBubble (src/components/ChatMessageBubble.tsx) -->
+      <div class="msg msg-ai rel">
+        <span class="wf-badge-new" style="top:0;right:-60px;font-size:9px;" title="src/components/ChatMessageBubble.tsx">[NEW] MsgBubble</span>
+        <div class="msg-label">🤖 SmartDocs AI · just now</div>
+        <div class="msg-bubble">Hello! I've indexed 3 documents and I'm ready. What would you like to know?</div>
+      </div>
+
+      <div class="msg msg-user">
+        <div class="msg-label">You · 2:31 PM</div>
+        <div class="msg-bubble">What sorting algorithms are in Week 2?</div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-label">🤖 SmartDocs AI · 2:31 PM</div>
+        <div class="msg-bubble">
+          Based on <em>CMPS441_Week2.pdf</em>, the covered algorithms include:<br><br>
+          1. <strong>Bubble Sort</strong> — O(n²)<br>
+          2. <strong>Insertion Sort</strong> — O(n²) worst case<br>
+          3. <strong>Merge Sort</strong> — O(n log n)<br>
+          4. <strong>Quick Sort</strong> — O(n log n) average<br><br>
+          The document also covers asymptotic growth notation (Big-O, Theta, Omega).
+        </div>
+        <!-- NEW COMPONENT: SourceCitations (src/components/SourceCitations.tsx) -->
+        <div class="rel">
+          <span class="wf-badge-new" style="top:0;right:0;font-size:9px;" title="src/components/SourceCitations.tsx">[NEW] SourceCitations</span>
+          <div class="source-bar">
+            📎 Sources:
+            <span class="source-tag">Week2.pdf · chunk 3</span>
+            <span class="source-tag">Week2.pdf · chunk 5</span>
+            <span class="source-tag">Week2.pdf · chunk 8</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg msg-user">
+        <div class="msg-label">You · 2:33 PM</div>
+        <div class="msg-bubble">What's the candidate's educational background?</div>
+      </div>
+
+      <!-- Typing indicator -->
+      <!-- NEW COMPONENT: TypingIndicator (src/components/TypingIndicator.tsx) -->
+      <div class="msg msg-ai rel">
+        <span class="wf-badge-new" style="top:0;right:-72px;font-size:9px;" title="src/components/TypingIndicator.tsx">[NEW] Typing</span>
+        <div class="msg-label">🤖 SmartDocs AI</div>
+        <div class="msg-bubble">
+          <div class="typing">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            &nbsp;Searching CV.pdf…
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input Area -->
+    <!-- NEW COMPONENT: MessageInput (src/components/MessageInput.tsx) -->
+    <div class="chat-input-area rel">
+      <span class="wf-badge-new" style="top:-4px;right:4px;" title="src/components/MessageInput.tsx">[NEW] MessageInput</span>
+      <div class="input-row">
+        <textarea class="chat-textarea" rows="2" placeholder="Ask anything about your documents…"></textarea>
+        <div class="input-actions">
+          <button class="btn-attach">📎 Attach</button>
+          <button class="btn-send">Send ↵</button>
+        </div>
+      </div>
+      <div class="input-hint">Press Enter to send · Shift+Enter for new line · Ctrl+K to clear</div>
+    </div>
+  </div>
+
+</div><!-- /main-row -->
+
+<!-- LEGEND -->
+<div class="legend" style="flex-shrink:0;">
+  <strong>Components:</strong>
+  <span><span class="legend-dot" style="background:#FF9800;"></span>[NEW] = New component to build</span>
+  <span><span class="legend-dot" style="background:#4CAF50;"></span>[REUSE] = Existing component</span>
+  <span style="margin-left:auto;color:#888;">Option 2 / 3 — shadcn + React + Vite + Tailwind v4</span>
+</div>
+
+</body>
+</html>
