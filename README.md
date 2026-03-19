@@ -2,8 +2,6 @@
 
 A RAG-based document assistant I built using **FastAPI**, **FAISS**, and **Google Gemini 2.5**. Upload PDFs, ask questions about them in natural language, and get answers grounded in the actual document content.
 
-![SmartDocs AI Screenshot](docs/screenshot.png)
-<!-- Add screenshot -->
 
 ---
 
@@ -112,9 +110,7 @@ The app is deployed at: smartdocs-ai.up.railway.app
 
 ## Screenshots
 
-| | |
-|---|---|
-| _coming soon_ | _coming soon_ |
+![SmartDocs AI](docs/screenshot.png)
 
 ---
 
