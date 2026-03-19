@@ -104,7 +104,7 @@ Open `http://localhost:8000`.
 
 ## Deployed on Railway
 
-The app is deployed at: smartdocs-ai.up.railway.app
+The app is deployed at: [smartdocs-ai.up.railway.app](https://smartdocs-ai.up.railway.app)
 
 ---
 
