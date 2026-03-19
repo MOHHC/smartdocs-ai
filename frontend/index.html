@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartDocs AI</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236366F1'/%3E%3Cpath d='M10 8h8l6 6v12a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2z' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M18 8v6h6' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 17h8M12 21h5' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:    #6366F1;
+      --primary-dk: #4F46E5;
+      --primary-lt: #EEF2FF;
+      --secondary:  #818CF8;
+      --cta:        #10B981;
+      --cta-dk:     #059669;
+      --bg:         #F8F7FF;
+      --surface:    #FFFFFF;
+      --border:     #E2E0F9;
+      --text:       #1E1B4B;
+      --muted:      #6B7280;
+      --user-bg:    #6366F1;
+      --ai-bg:      #FFFFFF;
+      --code-bg:    #F1F5F9;
+      --green:      #10B981;
+      --red:        #EF4444;
+      --blue:       #6366F1;
+    }
+
+    body {
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 820px;
+      padding: 16px 20px 0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-icon svg { width: 16px; height: 16px; fill: #fff; }
+
+    .logo span { color: var(--primary); }
+
+    .logo-sub {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--primary-lt);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 8px;
+      margin-left: 4px;
+      letter-spacing: 0.2px;
+    }
+
+    #api-key-btn {
+      margin-left: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-family: inherit;
+      font-weight: 500;
+      padding: 6px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+
+    #api-key-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; flex-shrink: 0; }
+    #api-key-btn:hover { color: var(--text); border-color: var(--secondary); background: var(--primary-lt); }
+
+    #new-chat-btn {
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.82rem;
+      font-family: inherit;
+      font-weight: 600;
+      padding: 6px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    #new-chat-btn svg { width: 14px; height: 14px; stroke: #fff; fill: none; flex-shrink: 0; }
+    #new-chat-btn:hover { background: var(--primary-dk); }
+
+    /* ── Upload bar ── */
+    #upload-bar {
+      width: 100%;
+      max-width: 820px;
+      padding: 14px 20px 6px;
+      flex-shrink: 0;
+    }
+
+    #drop-zone {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1.5px dashed var(--border);
+      border-radius: 12px;
+      padding: 11px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+
+    #drop-zone:hover        { border-color: var(--secondary); background: var(--primary-lt); }
+    #drop-zone.dragover     { border-color: var(--primary); background: var(--primary-lt); }
+    #drop-zone.uploaded     { border-style: solid; border-color: var(--cta); background: #F0FDF9; }
+
+    .dz-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--primary-lt);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .dz-icon svg { width: 16px; height: 16px; stroke: var(--primary); fill: none; }
+    #drop-zone.uploaded .dz-icon { background: #D1FAE5; }
+    #drop-zone.uploaded .dz-icon svg { stroke: var(--cta); }
+
+    #drop-zone .dz-label    { flex: 1; font-size: 0.85rem; color: var(--muted); }
+    #drop-zone .dz-label strong { color: var(--text); display: block; font-weight: 600; font-size: 0.88rem; }
+    #upload-status          { font-size: 0.78rem; flex-shrink: 0; font-weight: 500; }
+    #file-input             { display: none; }
+
+    /* doc pills */
+    #doc-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 6px 20px 0;
+      width: 100%;
+      max-width: 820px;
+      flex-shrink: 0;
+    }
+
+    .doc-pill {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 10px 3px 8px;
+      font-size: 0.73rem;
+      font-weight: 500;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .doc-pill svg { width: 12px; height: 12px; stroke: currentColor; fill: none; flex-shrink: 0; }
+
+    .doc-pill-del {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      margin-left: 2px;
+      opacity: 0.4;
+      transition: opacity 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .doc-pill:hover .doc-pill-del { opacity: 1; }
+    .doc-pill-del:hover { background: rgba(239,68,68,0.15); }
+    .doc-pill-del svg { width: 10px; height: 10px; stroke: var(--red); }
+
+    .doc-pill:hover {
+      background: var(--primary-lt);
+      border-color: var(--secondary);
+      color: var(--primary);
+    }
+
+    .doc-pill.active {
+      background: var(--primary-lt);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    #doc-pills-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 20px 0;
+      width: 100%;
+      max-width: 820px;
+      flex-shrink: 0;
+    }
+
+    /* ── Chat ── */
+    #chat {
+      flex: 1;
+      width: 100%;
+      max-width: 820px;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+
+    #chat::-webkit-scrollbar       { width: 4px; }
+    #chat::-webkit-scrollbar-track  { background: transparent; }
+    #chat::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 4px; }
+
+    /* ── Message rows ── */
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: msgIn 0.2s ease-out;
+    }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-row.user { align-items: flex-end; }
+    .msg-row.ai   { align-items: flex-start; }
+
+    .role-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .msg-row.ai .role-label { color: var(--primary); }
+
+    /* ── Bubbles ── */
+    .bubble-wrap { position: relative; max-width: 88%; }
+    .msg-row.user .bubble-wrap { max-width: 72%; }
+
+    .bubble {
+      padding: 13px 17px;
+      border-radius: 16px;
+      font-size: 0.91rem;
+      line-height: 1.7;
+      word-break: break-word;
+    }
+
+    .msg-row.user .bubble {
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      white-space: pre-wrap;
+    }
+
+    .msg-row.ai .bubble {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble.thinking { color: var(--muted); font-style: italic; }
+
+    /* ── Markdown inside AI bubble ── */
+    .bubble h1, .bubble h2, .bubble h3 {
+      font-weight: 700;
+      margin: 14px 0 6px;
+      line-height: 1.3;
+      color: var(--text);
+    }
+    .bubble h1 { font-size: 1.08rem; }
+    .bubble h2 { font-size: 1rem; }
+    .bubble h3 { font-size: 0.93rem; }
+    .bubble h1:first-child,
+    .bubble h2:first-child,
+    .bubble h3:first-child { margin-top: 0; }
+
+    .bubble p  { margin: 6px 0; }
+    .bubble p:first-child { margin-top: 0; }
+    .bubble p:last-child  { margin-bottom: 0; }
+
+    .bubble ul, .bubble ol { padding-left: 20px; margin: 6px 0; }
+    .bubble li { margin: 3px 0; }
+
+    .bubble strong { color: var(--text); font-weight: 700; }
+    .bubble em     { color: var(--muted); }
+
+    .bubble a { color: var(--primary); text-decoration: underline; }
+
+    .bubble blockquote {
+      border-left: 3px solid var(--primary);
+      padding: 4px 12px;
+      margin: 8px 0;
+      color: var(--muted);
+      font-style: italic;
+      background: var(--primary-lt);
+      border-radius: 0 6px 6px 0;
+    }
+
+    .bubble code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.83em;
+      color: var(--primary-dk);
+    }
+
+    .bubble pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      margin: 10px 0;
+      position: relative;
+    }
+
+    .code-copy-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.68rem;
+      font-family: inherit;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .bubble pre:hover .code-copy-btn { opacity: 1; }
+    .code-copy-btn:hover { color: var(--text); border-color: var(--secondary); }
+    .code-copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+    .bubble pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85em;
+      color: #334155;
+    }
+
+    .bubble table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 8px 0;
+      font-size: 0.85rem;
+    }
+
+    .bubble th, .bubble td {
+      border: 1px solid var(--border);
+      padding: 7px 11px;
+      text-align: left;
+    }
+
+    .bubble th { background: var(--primary-lt); color: var(--primary-dk); font-weight: 700; }
+    .bubble tr:nth-child(even) td { background: #FAFAF9; }
+
+    /* ── Copy button ── */
+    .copy-btn {
+      display: none;
+      position: absolute;
+      top: 8px; right: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 9px;
+      font-size: 0.72rem;
+      font-family: inherit;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      z-index: 1;
+    }
+
+    .bubble-wrap:hover .copy-btn { display: block; }
+    .copy-btn:hover { color: var(--text); border-color: var(--secondary); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+    /* ── Context accordion ── */
+    .ctx-toggle {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 4px 0;
+      user-select: none;
+      transition: color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ctx-toggle:hover { color: var(--primary); }
+
+    .ctx-body { display: none; padding-top: 6px; }
+    .ctx-body.open { display: block; }
+
+    .chunk {
+      border-left: 2px solid var(--border);
+      padding: 5px 10px;
+      margin-bottom: 6px;
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.5;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .chunk-meta {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--secondary);
+      margin-bottom: 2px;
+    }
+
+    /* ── Input bar ── */
+    #input-bar {
+      width: 100%;
+      max-width: 820px;
+      padding: 10px 20px 20px;
+      flex-shrink: 0;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 10px 10px 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-row:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 0.93rem;
+      font-family: inherit;
+      outline: none;
+      resize: none;
+      line-height: 1.5;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    textarea::placeholder { color: #A5B4FC; }
+
+    #ask-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.2s;
+      flex-shrink: 0;
+    }
+
+    #ask-btn:hover    { background: var(--primary-dk); }
+    #ask-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    #ask-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+    /* status colours */
+    .ok   { color: var(--green); }
+    .err  { color: var(--red); }
+    .info { color: var(--secondary); }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 13px; height: 13px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Empty state */
+    #empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    #empty-state .es-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--primary-lt);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #empty-state .es-icon svg { width: 26px; height: 26px; stroke: var(--primary); fill: none; }
+
+    #empty-state h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    #empty-state p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+      max-width: 300px;
+      line-height: 1.6;
+    }
+
+    /* Divider line below header */
+    .header-divider {
+      width: 100%;
+      max-width: 820px;
+      height: 1px;
+      background: var(--border);
+      margin-top: 14px;
+      flex-shrink: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .msg-row { animation: none; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    </div>
+    Smart<span>Docs</span> AI
+    <span class="logo-sub">RAG · Gemini 2.5</span>
+  </div>
+  <button id="api-key-btn" title="Set API key">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+    API Key
+  </button>
+  <button id="new-chat-btn">
+    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    New Chat
+  </button>
+</header>
+<div class="header-divider"></div>
+
+<!-- Upload bar -->
+<div id="upload-bar">
+  <div id="drop-zone">
+    <div class="dz-icon">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+    </div>
+    <div class="dz-label">
+      <strong id="dz-filename">Attach a PDF to get started</strong>
+      Drag & drop or click to upload
+    </div>
+    <span id="upload-status"></span>
+    <input type="file" id="file-input" accept=".pdf" />
+  </div>
+</div>
+
+<!-- Document pills -->
+<div id="doc-pills-label" style="display:none">Filter by document:</div>
+<div id="doc-pills"></div>
+
+<!-- Chat -->
+<div id="chat">
+  <div id="empty-state">
+    <div class="es-icon">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    </div>
+    <h3>Ask anything about your documents</h3>
+    <p>Upload a PDF and start asking questions — or just chat with the AI directly.</p>
+  </div>
+</div>
+
+<!-- Input -->
+<div id="input-bar">
+  <div id="filter-indicator" style="display:none; font-size:0.73rem; color:var(--primary); font-weight:600; padding:0 4px 6px; display:none; align-items:center; gap:5px;">
+    <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+    <span id="filter-indicator-text"></span>
+  </div>
+  <div class="input-row">
+    <textarea id="question-input" rows="1" placeholder="Ask a question about your documents…"></textarea>
+    <button id="ask-btn" title="Send">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  // When opened as a local file:// use the dev server; when served by FastAPI use same origin.
+  const API = window.location.protocol === "file:" ? "http://127.0.0.1:8000" : "";
+
+  // Optional API key — stored in localStorage, sent with every mutating request.
+  function getApiKey() { return localStorage.getItem("smartdocs_api_key") || ""; }
+
+  function authHeaders() {
+    const key = getApiKey();
+    return key ? { "X-API-Key": key } : {};
+  }
+
+  marked.setOptions({ breaks: true, gfm: true });
+
+  function renderMarkdown(text) {
+    return DOMPurify.sanitize(marked.parse(text));
+  }
+
+  // ── DOM refs ─────────────────────────────────────────────
+  const dropZone      = document.getElementById("drop-zone");
+  const fileInput     = document.getElementById("file-input");
+  const uploadStatus  = document.getElementById("upload-status");
+  const dzFilename    = document.getElementById("dz-filename");
+  const docPills      = document.getElementById("doc-pills");
+  const chat          = document.getElementById("chat");
+  const emptyState    = document.getElementById("empty-state");
+  const questionInput = document.getElementById("question-input");
+  const askBtn        = document.getElementById("ask-btn");
+
+  // ── Load existing docs on startup ───────────────────────
+  async function loadDocuments() {
+    try {
+      const res  = await fetch(`${API}/documents`);
+      if (!res.ok) return;
+      const data = await res.json();
+      data.documents.forEach(addDocPill);
+      if (data.documents.length > 0) {
+        dzFilename.textContent = `${data.documents.length} document(s) loaded`;
+        dropZone.classList.add("uploaded");
+      }
+    } catch {
+      dzFilename.textContent = "Backend offline — start the server to continue";
+    }
+  }
+
+  loadDocuments();
+
+  // ── API Key button ───────────────────────────────────────
+  document.getElementById("api-key-btn").addEventListener("click", () => {
+    const current = getApiKey();
+    const val = prompt("Enter your API key (leave blank to clear):", current);
+    if (val === null) return;
+    if (val.trim()) { localStorage.setItem("smartdocs_api_key", val.trim()); }
+    else            { localStorage.removeItem("smartdocs_api_key"); }
+  });
+
+  // ── New Chat ─────────────────────────────────────────────
+  document.getElementById("new-chat-btn").addEventListener("click", async () => {
+    try { await fetch(`${API}/reset`, { method: "POST", headers: authHeaders() }); } catch {}
+    messages = [];
+    renderAllMessages();
+    questionInput.focus();
+  });
+
+  // ── Document filter state ────────────────────────────────
+  const selectedDocs = new Set();  // empty = query all
+
+  function updateFilterIndicator() {
+    const el   = document.getElementById("filter-indicator");
+    const text = document.getElementById("filter-indicator-text");
+    if (selectedDocs.size === 0) {
+      el.style.display = "none";
+    } else {
+      text.textContent = `Filtering by ${selectedDocs.size} document${selectedDocs.size > 1 ? "s" : ""}`;
+      el.style.display = "flex";
+    }
+  }
+
+  function addDocPill(name) {
+    if (document.querySelector(`.doc-pill[data-name="${CSS.escape(name)}"]`)) return;
+    const pill = document.createElement("div");
+    pill.className = "doc-pill";
+    pill.dataset.name = name;
+    pill.innerHTML = `
+      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>${escapeHtml(name)}</span>
+      <span class="doc-pill-del" title="Remove document">
+        <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </span>`;
+
+    // Toggle filter on pill body click (not the delete button)
+    pill.addEventListener("click", (e) => {
+      if (e.target.closest(".doc-pill-del")) return;
+      if (selectedDocs.has(name)) {
+        selectedDocs.delete(name);
+        pill.classList.remove("active");
+      } else {
+        selectedDocs.add(name);
+        pill.classList.add("active");
+      }
+      updateFilterIndicator();
+    });
+
+    pill.querySelector(".doc-pill-del").addEventListener("click", async (e) => {
+      e.stopPropagation();
+      try {
+        const res = await fetch(`${API}/documents/${encodeURIComponent(name)}`, {
+          method: "DELETE", headers: authHeaders(),
+        });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.detail); }
+      } catch (err) {
+        if (!err.message?.includes("404")) console.warn("Delete failed:", err.message);
+      }
+      selectedDocs.delete(name);
+      pill.remove();
+      updateFilterIndicator();
+      if (!docPills.querySelector(".doc-pill")) {
+        document.getElementById("doc-pills-label").style.display = "none";
+      }
+    });
+
+    docPills.appendChild(pill);
+    document.getElementById("doc-pills-label").style.display = "";
+  }
+
+  // ── Upload ───────────────────────────────────────────────
+  dropZone.addEventListener("click", () => fileInput.click());
+  dropZone.addEventListener("dragover",  e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+  dropZone.addEventListener("drop", e => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+    if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files[0]) uploadFile(fileInput.files[0]);
+  });
+
+  async function uploadFile(file) {
+    if (!file.name.endsWith(".pdf")) {
+      setStatus("Only PDF files are supported.", "err");
+      return;
+    }
+
+    setStatus('<span class="spinner"></span>', "info");
+    dzFilename.textContent = `Uploading ${file.name}…`;
+
+    const form = new FormData();
+    form.append("file", file);
+
+    try {
+      const res  = await fetch(`${API}/upload`, { method: "POST", headers: authHeaders(), body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Upload failed");
+
+      dzFilename.textContent = file.name;
+      dropZone.classList.add("uploaded");
+      setStatus(`✓ ${data.chunks_stored} chunks`, "ok");
+      addDocPill(file.name);
+    } catch (err) {
+      dzFilename.textContent = "Upload failed — try again";
+      setStatus(friendlyUploadError(err), "err");
+    }
+  }
+
+  function setStatus(html, cls) {
+    uploadStatus.innerHTML = html;
+    uploadStatus.className = cls;
+  }
+
+  // ── Auto-resize textarea ─────────────────────────────────
+  questionInput.addEventListener("input", () => {
+    questionInput.style.height = "auto";
+    questionInput.style.height = questionInput.scrollHeight + "px";
+  });
+
+  questionInput.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendQuestion();
+    }
+  });
+
+  askBtn.addEventListener("click", sendQuestion);
+
+  // ── Conversation state ──────────────────────────────────
+  let messages = [];  // { role: "user" | "assistant", content: string }
+
+  // ── Error helpers ────────────────────────────────────────
+  function friendlyError(err) {
+    const msg = err.message || "";
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("Load failed"))
+      return "**Connection error** — couldn't reach the server. Make sure the backend is running.";
+    if (msg.includes("401") || msg.includes("Invalid or missing API key"))
+      return "**Authentication error** — your API key is invalid or missing. Click API Key to update it.";
+    if (msg.includes("413") || msg.includes("too large"))
+      return "**File too large** — please upload a smaller PDF.";
+    if (msg.includes("502") || msg.includes("Gemini API error"))
+      return "**AI service error** — the Gemini API returned an error. Please try again in a moment.";
+    if (msg.includes("500"))
+      return "**Server error** — something went wrong on the backend. Check the server logs.";
+    return `**Error** — ${msg || "something went wrong. Please try again."}`;
+  }
+
+  function friendlyUploadError(err) {
+    const msg = err.message || "";
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError"))
+      return "No connection to server";
+    if (msg.includes("401"))
+      return "Invalid API key";
+    if (msg.includes("exceeds") || msg.includes("too large") || msg.includes("413"))
+      return "File too large (max 20 MB)";
+    if (msg.includes("No text"))
+      return "PDF has no extractable text";
+    if (msg.includes("empty") || msg.includes("unreadable"))
+      return "PDF appears empty or corrupted";
+    return msg || "Upload failed";
+  }
+
+  // ── Chat ─────────────────────────────────────────────────
+  async function sendQuestion() {
+    const question = questionInput.value.trim();
+    if (!question) return;
+
+    hideEmptyState();
+
+    messages.push({ role: "user", content: question });
+    appendUserBubble(question);
+    questionInput.value = "";
+    questionInput.style.height = "auto";
+    askBtn.disabled = true;
+
+    const aiRow = appendAiBubble('<span class="spinner"></span> Thinking…', true);
+
+    try {
+      const res  = await fetch(`${API}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({
+          question,
+          document_filter: selectedDocs.size > 0 ? [...selectedDocs] : null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Request failed");
+
+      messages.push({ role: "assistant", content: data.answer });
+      fillAiBubble(aiRow, data.answer, data.context_chunks);
+    } catch (err) {
+      // Show error in the bubble without adding to persistent chat history
+      fillAiBubble(aiRow, friendlyError(err), [], false);
+      aiRow.dataset.error = "1";
+    } finally {
+      askBtn.disabled = false;
+      questionInput.focus();
+    }
+  }
+
+  function hideEmptyState() {
+    const el = document.getElementById("empty-state");
+    if (el) el.remove();
+  }
+
+  function renderAllMessages() {
+    chat.innerHTML = "";
+    if (messages.length === 0) {
+      chat.innerHTML = `
+        <div id="empty-state">
+          <div class="es-icon">
+            <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="#6366F1" fill="none"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          </div>
+          <h3>Ask anything about your documents</h3>
+          <p>Upload a PDF and start asking questions — or just chat with the AI directly.</p>
+        </div>`;
+      return;
+    }
+    messages.forEach(msg => {
+      if (msg.role === "user") {
+        appendUserBubble(msg.content);
+      } else {
+        const row = appendAiBubble("", false);
+        fillAiBubble(row, msg.content, [], false);
+      }
+    });
+  }
+
+  function appendUserBubble(text) {
+    const row = document.createElement("div");
+    row.className = "msg-row user";
+    row.innerHTML = `
+      <div class="role-label">You</div>
+      <div class="bubble-wrap">
+        <div class="bubble">${escapeHtml(text)}</div>
+      </div>`;
+    chat.appendChild(row);
+    scrollToBottom();
+    return row;
+  }
+
+  function appendAiBubble(html, isThinking = false) {
+    const row = document.createElement("div");
+    row.className = "msg-row ai";
+    row.innerHTML = `
+      <div class="role-label">SmartDocs AI</div>
+      <div class="bubble-wrap">
+        <div class="bubble${isThinking ? " thinking" : ""}">${html}</div>
+      </div>`;
+    chat.appendChild(row);
+    scrollToBottom();
+    return row;
+  }
+
+  function fillAiBubble(row, answer, chunks, animate = true) {
+    const wrap   = row.querySelector(".bubble-wrap");
+    const bubble = wrap.querySelector(".bubble");
+
+    bubble.className = "bubble";
+
+    if (animate && answer.length > 0) {
+      typeOutAnswer(bubble, answer, () => finalizeBubble(wrap, bubble, answer, chunks));
+      return;
+    }
+
+    bubble.innerHTML = renderMarkdown(answer);
+    addCodeCopyButtons(bubble);
+    finalizeBubbleExtras(wrap, bubble, answer, chunks);
+  }
+
+  function typeOutAnswer(bubble, answer, onDone) {
+    const words = answer.split(/(\s+)/);
+    let i = 0;
+    const batchSize = 3;
+    const interval = 25;
+
+    function tick() {
+      if (i >= words.length) {
+        bubble.innerHTML = renderMarkdown(answer);
+        addCodeCopyButtons(bubble);
+        onDone();
+        return;
+      }
+      const end = Math.min(i + batchSize, words.length);
+      const partial = words.slice(0, end).join("");
+      bubble.innerHTML = renderMarkdown(partial);
+      i = end;
+      scrollToBottom();
+      setTimeout(tick, interval);
+    }
+
+    tick();
+  }
+
+  function addCodeCopyButtons(bubble) {
+    bubble.querySelectorAll("pre").forEach(pre => {
+      const btn = document.createElement("button");
+      btn.className = "code-copy-btn";
+      btn.textContent = "Copy";
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code")?.textContent || pre.textContent;
+        navigator.clipboard.writeText(code).then(() => {
+          btn.textContent = "Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 2000);
+        }).catch(() => {
+          btn.textContent = "Failed";
+          setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+        });
+      });
+      pre.appendChild(btn);
+    });
+  }
+
+  function finalizeBubble(wrap, bubble, answer, chunks) {
+    finalizeBubbleExtras(wrap, bubble, answer, chunks);
+  }
+
+  function finalizeBubbleExtras(wrap, bubble, answer, chunks) {
+
+    // copy button
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "copy-btn";
+    copyBtn.textContent = "Copy";
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(answer).then(() => {
+        copyBtn.textContent = "Copied!";
+        copyBtn.classList.add("copied");
+        setTimeout(() => { copyBtn.textContent = "Copy"; copyBtn.classList.remove("copied"); }, 2000);
+      }).catch(() => {
+        copyBtn.textContent = "Failed";
+        setTimeout(() => { copyBtn.textContent = "Copy"; }, 1500);
+      });
+    });
+    wrap.appendChild(copyBtn);
+
+    // context accordion
+    if (chunks && chunks.length > 0) {
+      const toggle = document.createElement("div");
+      toggle.className = "ctx-toggle";
+      toggle.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg> ${chunks.length} source chunk${chunks.length > 1 ? "s" : ""}`;
+
+      const body = document.createElement("div");
+      body.className = "ctx-body";
+
+      chunks.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "chunk";
+        div.innerHTML =
+          `<div class="chunk-meta">${escapeHtml(c.filename)} · chunk #${c.chunk_index} · score ${c.relevance_score.toFixed(3)}</div>` +
+          escapeHtml(c.text);
+        body.appendChild(div);
+      });
+
+      toggle.addEventListener("click", () => {
+        const open = body.classList.toggle("open");
+        toggle.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="${open ? "18 15 12 9 6 15" : "9 18 15 12 9 6"}"/></svg> ${chunks.length} source chunk${chunks.length > 1 ? "s" : ""}`;
+        scrollToBottom();
+      });
+
+      wrap.appendChild(toggle);
+      wrap.appendChild(body);
+    }
+
+    scrollToBottom();
+  }
+
+  function scrollToBottom() {
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+</script>
+
+</body>
+</html>
