@@ -4,39 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartDocs AI</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236366F1'/%3E%3Cpath d='M10 8h8l6 6v12a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2z' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M18 8v6h6' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 17h8M12 21h5' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D0C0A'/%3E%3Crect x='1' y='1' width='30' height='30' rx='5' fill='none' stroke='%23CF9A45' stroke-width='1.5'/%3E%3Ctext x='16' y='22' font-family='serif' font-size='16' font-weight='700' fill='%23CF9A45' text-anchor='middle'%3ESD%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,400&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary:    #6366F1;
-      --primary-dk: #4F46E5;
-      --primary-lt: #EEF2FF;
-      --secondary:  #818CF8;
-      --cta:        #10B981;
-      --cta-dk:     #059669;
-      --bg:         #F8F7FF;
-      --surface:    #FFFFFF;
-      --border:     #E2E0F9;
-      --text:       #1E1B4B;
-      --muted:      #6B7280;
-      --user-bg:    #6366F1;
-      --ai-bg:      #FFFFFF;
-      --code-bg:    #F1F5F9;
-      --green:      #10B981;
-      --red:        #EF4444;
-      --blue:       #6366F1;
+      --bg:          #0D0C0A;
+      --surface:     #141210;
+      --surface-2:   #1C1915;
+      --border:      #2C2620;
+      --border-lt:   #3D3528;
+      --amber:       #CF9A45;
+      --amber-lt:    #E5B96A;
+      --amber-dim:   rgba(207, 154, 69, 0.10);
+      --amber-glow:  rgba(207, 154, 69, 0.20);
+      --cream:       #EDE5D4;
+      --cream-2:     #C8BDA8;
+      --muted:       #7A6A54;
+      --muted-lt:    #9A8A72;
+      --green:       #78A882;
+      --red:         #B87272;
+      --blue:        #7A9BBF;
     }
 
+    html { height: 100%; }
+
     body {
-      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: "Figtree", sans-serif;
+      background-color: var(--bg);
+      /* Subtle amber dot-grid texture */
+      background-image: radial-gradient(circle, rgba(207, 154, 69, 0.07) 1px, transparent 1px);
+      background-size: 28px 28px;
+      color: var(--cream);
       height: 100dvh;
       display: flex;
       flex-direction: column;
@@ -44,158 +48,326 @@
       overflow: hidden;
     }
 
+    /* ── Page load animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     /* ── Header ── */
     header {
       width: 100%;
-      max-width: 820px;
-      padding: 16px 20px 0;
+      max-width: 860px;
+      padding: 18px 24px 16px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp 0.4s ease-out both;
     }
 
     .logo {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      color: var(--text);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      text-decoration: none;
     }
 
-    .logo-icon {
-      width: 30px;
-      height: 30px;
-      background: var(--primary);
-      border-radius: 8px;
+    /* Amber square monogram */
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      border: 1.5px solid var(--amber);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      transition: background 0.2s;
     }
 
-    .logo-icon svg { width: 16px; height: 16px; fill: #fff; }
+    .logo-mark span {
+      font-family: "Fraunces", serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--amber);
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
 
-    .logo span { color: var(--primary); }
+    .logo:hover .logo-mark { background: var(--amber-dim); }
 
-    .logo-sub {
-      font-size: 0.72rem;
+    .logo-text {
+      font-family: "Fraunces", serif;
       font-weight: 500;
+      font-size: 1.1rem;
+      color: var(--cream);
+      letter-spacing: -0.3px;
+    }
+
+    .logo-text em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--amber-lt);
+    }
+
+    .logo-badge {
+      font-size: 0.65rem;
+      font-weight: 500;
+      font-family: "Figtree", sans-serif;
       color: var(--muted);
-      background: var(--primary-lt);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2px 8px;
-      margin-left: 4px;
-      letter-spacing: 0.2px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-lt);
+      padding: 2px 7px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
     }
 
     #api-key-btn {
       margin-left: auto;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-family: inherit;
+      background: transparent;
+      border: 1px solid var(--border-lt);
+      color: var(--muted-lt);
+      font-size: 0.78rem;
+      font-family: "Figtree", sans-serif;
       font-weight: 500;
       padding: 6px 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
+      letter-spacing: 0.2px;
       transition: color 0.15s, border-color 0.15s, background 0.15s;
     }
 
-    #api-key-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; flex-shrink: 0; }
-    #api-key-btn:hover { color: var(--text); border-color: var(--secondary); background: var(--primary-lt); }
+    #api-key-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; flex-shrink: 0; }
+    #api-key-btn:hover { color: var(--cream); border-color: var(--amber); background: var(--amber-dim); }
+
+    /* API Key Modal */
+    #apikey-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    #apikey-overlay.open { display: flex; }
+    #apikey-modal {
+      background: var(--surface-2);
+      border: 1px solid var(--border-lt);
+      border-radius: 12px;
+      padding: 28px 28px 24px;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #apikey-modal h3 {
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #apikey-modal h3 svg { width: 16px; height: 16px; stroke: var(--amber); fill: none; flex-shrink: 0; }
+    #apikey-modal p {
+      font-size: 0.82rem;
+      color: var(--muted-lt);
+      line-height: 1.5;
+    }
+    #apikey-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border-lt);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--cream);
+      font-family: "Figtree", sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    #apikey-input:focus { border-color: var(--amber); }
+    #apikey-input::placeholder { color: var(--muted); }
+    .apikey-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .apikey-actions button {
+      font-family: "Figtree", sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .apikey-actions button:hover { opacity: 0.85; }
+    #apikey-cancel {
+      background: transparent;
+      border: 1px solid var(--border-lt);
+      color: var(--muted-lt);
+    }
+    #apikey-save {
+      background: var(--amber);
+      border: none;
+      color: var(--bg);
+    }
+    #apikey-clear {
+      background: transparent;
+      border: 1px solid var(--red);
+      color: var(--red);
+      margin-right: auto;
+    }
 
     #new-chat-btn {
-      background: var(--primary);
+      background: var(--amber);
       border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 0.82rem;
-      font-family: inherit;
+      color: var(--bg);
+      font-size: 0.78rem;
+      font-family: "Figtree", sans-serif;
       font-weight: 600;
-      padding: 6px 14px;
+      padding: 7px 14px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
-      transition: background 0.15s;
-      white-space: nowrap;
+      letter-spacing: 0.2px;
+      transition: background 0.15s, transform 0.1s;
     }
 
-    #new-chat-btn svg { width: 14px; height: 14px; stroke: #fff; fill: none; flex-shrink: 0; }
-    #new-chat-btn:hover { background: var(--primary-dk); }
+    #new-chat-btn svg { width: 13px; height: 13px; stroke: var(--bg); fill: none; flex-shrink: 0; }
+    #new-chat-btn:hover { background: var(--amber-lt); }
+    #new-chat-btn:active { transform: scale(0.97); }
 
     /* ── Upload bar ── */
     #upload-bar {
       width: 100%;
-      max-width: 820px;
-      padding: 14px 20px 6px;
+      max-width: 860px;
+      padding: 14px 24px 8px;
       flex-shrink: 0;
+      animation: fadeUp 0.4s 0.08s ease-out both;
     }
 
+    /* Marching ants dashed border */
     #drop-zone {
       display: flex;
       align-items: center;
-      gap: 12px;
-      background: var(--surface);
-      border: 1.5px dashed var(--border);
-      border-radius: 12px;
-      padding: 11px 16px;
+      gap: 14px;
+      padding: 12px 16px;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
       user-select: none;
+      position: relative;
+      transition: background 0.2s;
+
+      /* CSS dashed border via background-image */
+      background-image:
+        repeating-linear-gradient(0deg,   var(--border-lt), var(--border-lt) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(90deg,  var(--border-lt), var(--border-lt) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(180deg, var(--border-lt), var(--border-lt) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(270deg, var(--border-lt), var(--border-lt) 5px, transparent 5px, transparent 12px);
+      background-size: 1px 12px, 12px 1px, 1px 12px, 12px 1px;
+      background-position: 0 0, 0 0, 100% 0, 0 100%;
+      background-repeat: repeat-y, repeat-x, repeat-y, repeat-x;
+      background-color: transparent;
     }
 
-    #drop-zone:hover        { border-color: var(--secondary); background: var(--primary-lt); }
-    #drop-zone.dragover     { border-color: var(--primary); background: var(--primary-lt); }
-    #drop-zone.uploaded     { border-style: solid; border-color: var(--cta); background: #F0FDF9; }
+    #drop-zone:hover {
+      background-color: var(--amber-dim);
+      background-image:
+        repeating-linear-gradient(0deg,   var(--amber), var(--amber) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(90deg,  var(--amber), var(--amber) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(180deg, var(--amber), var(--amber) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(270deg, var(--amber), var(--amber) 5px, transparent 5px, transparent 12px);
+    }
+
+    @keyframes marchingAnts {
+      0%   { background-position: 0 0,    0 0,    100% 0,    0 100%; }
+      100% { background-position: 0 -12px, 12px 0, 100% 12px, -12px 100%; }
+    }
+
+    #drop-zone.dragover {
+      background-color: var(--amber-dim);
+      animation: marchingAnts 0.35s linear infinite;
+      background-image:
+        repeating-linear-gradient(0deg,   var(--amber), var(--amber) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(90deg,  var(--amber), var(--amber) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(180deg, var(--amber), var(--amber) 5px, transparent 5px, transparent 12px),
+        repeating-linear-gradient(270deg, var(--amber), var(--amber) 5px, transparent 5px, transparent 12px);
+    }
+
+    #drop-zone.uploaded {
+      background-image: none;
+      border-left: 3px solid var(--green);
+      padding-left: 14px;
+      background-color: rgba(120, 168, 130, 0.05);
+    }
 
     .dz-icon {
-      width: 34px;
-      height: 34px;
-      background: var(--primary-lt);
-      border-radius: 8px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      color: var(--muted);
+      transition: color 0.2s;
     }
 
-    .dz-icon svg { width: 16px; height: 16px; stroke: var(--primary); fill: none; }
-    #drop-zone.uploaded .dz-icon { background: #D1FAE5; }
-    #drop-zone.uploaded .dz-icon svg { stroke: var(--cta); }
+    .dz-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
+    #drop-zone:hover .dz-icon,
+    #drop-zone.dragover .dz-icon { color: var(--amber); }
+    #drop-zone.uploaded .dz-icon { color: var(--green); }
 
-    #drop-zone .dz-label    { flex: 1; font-size: 0.85rem; color: var(--muted); }
-    #drop-zone .dz-label strong { color: var(--text); display: block; font-weight: 600; font-size: 0.88rem; }
-    #upload-status          { font-size: 0.78rem; flex-shrink: 0; font-weight: 500; }
-    #file-input             { display: none; }
+    #drop-zone .dz-label { flex: 1; font-size: 0.83rem; color: var(--muted-lt); line-height: 1.4; }
+    #drop-zone .dz-label strong {
+      color: var(--cream-2);
+      display: block;
+      font-weight: 500;
+      font-size: 0.86rem;
+    }
 
-    /* doc pills */
+    #upload-status { font-size: 0.76rem; flex-shrink: 0; font-weight: 500; }
+    #file-input    { display: none; }
+
+    /* ── Doc pills ── */
+    #doc-pills-label {
+      font-size: 0.63rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 10px 24px 0;
+      width: 100%;
+      max-width: 860px;
+      flex-shrink: 0;
+    }
+
     #doc-pills {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      padding: 6px 20px 0;
+      padding: 6px 24px 0;
       width: 100%;
-      max-width: 820px;
+      max-width: 860px;
       flex-shrink: 0;
     }
 
     .doc-pill {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      padding: 3px 10px 3px 8px;
-      font-size: 0.73rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border-lt);
+      border-left: 2px solid var(--muted);
+      padding: 3px 8px 3px 9px;
+      font-size: 0.72rem;
       font-weight: 500;
-      color: var(--muted);
+      color: var(--muted-lt);
       display: flex;
       align-items: center;
       gap: 5px;
@@ -204,75 +376,64 @@
       transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
 
-    .doc-pill svg { width: 12px; height: 12px; stroke: currentColor; fill: none; flex-shrink: 0; }
+    .doc-pill svg { width: 11px; height: 11px; stroke: currentColor; fill: none; flex-shrink: 0; }
 
     .doc-pill-del {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 14px; height: 14px;
-      border-radius: 50%;
       margin-left: 2px;
-      opacity: 0.4;
+      opacity: 0.3;
       transition: opacity 0.15s, background 0.15s;
       flex-shrink: 0;
     }
 
     .doc-pill:hover .doc-pill-del { opacity: 1; }
-    .doc-pill-del:hover { background: rgba(239,68,68,0.15); }
-    .doc-pill-del svg { width: 10px; height: 10px; stroke: var(--red); }
+    .doc-pill-del:hover { background: rgba(184, 114, 114, 0.2); }
+    .doc-pill-del svg { width: 9px; height: 9px; stroke: var(--red); }
 
     .doc-pill:hover {
-      background: var(--primary-lt);
-      border-color: var(--secondary);
-      color: var(--primary);
+      background: var(--amber-dim);
+      border-color: var(--amber);
+      border-left-color: var(--amber);
+      color: var(--amber-lt);
     }
 
     .doc-pill.active {
-      background: var(--primary-lt);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    #doc-pills-label {
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 8px 20px 0;
-      width: 100%;
-      max-width: 820px;
-      flex-shrink: 0;
+      background: var(--amber-dim);
+      border-color: var(--amber);
+      border-left-color: var(--amber);
+      color: var(--amber-lt);
     }
 
     /* ── Chat ── */
     #chat {
       flex: 1;
       width: 100%;
-      max-width: 820px;
+      max-width: 860px;
       overflow-y: auto;
-      padding: 16px 20px;
+      padding: 24px 24px 8px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
       scroll-behavior: smooth;
     }
 
-    #chat::-webkit-scrollbar       { width: 4px; }
+    #chat::-webkit-scrollbar       { width: 3px; }
     #chat::-webkit-scrollbar-track  { background: transparent; }
-    #chat::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 4px; }
+    #chat::-webkit-scrollbar-thumb  { background: var(--border-lt); border-radius: 2px; }
 
     /* ── Message rows ── */
     .msg-row {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      animation: msgIn 0.2s ease-out;
+      gap: 5px;
+      animation: msgIn 0.25s ease-out both;
     }
 
     @keyframes msgIn {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
@@ -280,328 +441,413 @@
     .msg-row.ai   { align-items: flex-start; }
 
     .role-label {
-      font-size: 0.68rem;
-      font-weight: 700;
+      font-size: 0.62rem;
+      font-weight: 600;
       color: var(--muted);
-      padding: 0 6px;
+      padding: 0 2px;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.9px;
     }
 
-    .msg-row.ai .role-label { color: var(--primary); }
+    .msg-row.ai .role-label {
+      color: var(--amber);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Amber dot before AI label */
+    .msg-row.ai .role-label::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      background: var(--amber);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
     /* ── Bubbles ── */
-    .bubble-wrap { position: relative; max-width: 88%; }
-    .msg-row.user .bubble-wrap { max-width: 72%; }
+    .bubble-wrap { position: relative; max-width: 90%; }
+    .msg-row.user .bubble-wrap { max-width: 68%; }
 
     .bubble {
-      padding: 13px 17px;
-      border-radius: 16px;
-      font-size: 0.91rem;
-      line-height: 1.7;
+      font-size: 0.9rem;
+      line-height: 1.75;
       word-break: break-word;
     }
 
+    /* User: amber-filled pill */
     .msg-row.user .bubble {
-      background: var(--primary);
-      color: #fff;
-      border-bottom-right-radius: 4px;
+      background: var(--amber);
+      color: #1A1408;
+      padding: 11px 17px;
+      border-radius: 2px 16px 16px 16px;
       white-space: pre-wrap;
+      font-weight: 400;
     }
 
+    /* AI: document-style — left amber rule, no background */
     .msg-row.ai .bubble {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      color: var(--text);
-      border-bottom-left-radius: 4px;
+      border-left: 2px solid var(--amber);
+      padding: 2px 0 2px 16px;
+      color: var(--cream);
+      background: transparent;
     }
 
-    .bubble.thinking { color: var(--muted); font-style: italic; }
+    .bubble.thinking {
+      color: var(--muted-lt);
+      font-style: italic;
+      border-left-color: var(--border-lt);
+    }
 
     /* ── Markdown inside AI bubble ── */
     .bubble h1, .bubble h2, .bubble h3 {
-      font-weight: 700;
-      margin: 14px 0 6px;
+      font-family: "Fraunces", serif;
+      font-weight: 500;
+      margin: 18px 0 8px;
       line-height: 1.3;
-      color: var(--text);
+      color: var(--cream);
     }
-    .bubble h1 { font-size: 1.08rem; }
-    .bubble h2 { font-size: 1rem; }
-    .bubble h3 { font-size: 0.93rem; }
+    .bubble h1 { font-size: 1.15rem; }
+    .bubble h2 { font-size: 1.05rem; }
+    .bubble h3 { font-size: 0.95rem; font-style: italic; }
     .bubble h1:first-child,
     .bubble h2:first-child,
     .bubble h3:first-child { margin-top: 0; }
 
-    .bubble p  { margin: 6px 0; }
+    .bubble p  { margin: 7px 0; }
     .bubble p:first-child { margin-top: 0; }
     .bubble p:last-child  { margin-bottom: 0; }
 
-    .bubble ul, .bubble ol { padding-left: 20px; margin: 6px 0; }
-    .bubble li { margin: 3px 0; }
+    .bubble ul, .bubble ol { padding-left: 20px; margin: 7px 0; }
+    .bubble li { margin: 4px 0; }
+    .bubble ul li::marker { color: var(--amber); }
+    .bubble ol li::marker { color: var(--amber); font-weight: 600; }
 
-    .bubble strong { color: var(--text); font-weight: 700; }
-    .bubble em     { color: var(--muted); }
+    .bubble strong { color: var(--cream); font-weight: 600; }
+    .bubble em     { color: var(--cream-2); font-style: italic; }
 
-    .bubble a { color: var(--primary); text-decoration: underline; }
+    .bubble a { color: var(--amber-lt); text-decoration: underline; text-underline-offset: 2px; }
+    .bubble a:hover { color: var(--amber); }
 
     .bubble blockquote {
-      border-left: 3px solid var(--primary);
-      padding: 4px 12px;
-      margin: 8px 0;
-      color: var(--muted);
+      border-left: 2px solid var(--border-lt);
+      padding: 3px 14px;
+      margin: 10px 0;
+      color: var(--muted-lt);
       font-style: italic;
-      background: var(--primary-lt);
-      border-radius: 0 6px 6px 0;
     }
 
     .bubble code {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 1px 5px;
-      font-family: "SF Mono", "Fira Code", monospace;
-      font-size: 0.83em;
-      color: var(--primary-dk);
+      background: var(--surface-2);
+      border: 1px solid var(--border-lt);
+      padding: 1px 6px;
+      font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+      font-size: 0.82em;
+      color: var(--amber-lt);
+      letter-spacing: -0.2px;
     }
 
     .bubble pre {
-      background: var(--code-bg);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-top: 2px solid var(--border-lt);
       padding: 14px 16px;
       overflow-x: auto;
-      margin: 10px 0;
+      margin: 12px 0;
       position: relative;
     }
 
     .code-copy-btn {
       position: absolute;
       top: 8px; right: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-lt);
       padding: 3px 8px;
-      font-size: 0.68rem;
-      font-family: inherit;
+      font-size: 0.66rem;
+      font-family: "Figtree", sans-serif;
       font-weight: 600;
       color: var(--muted);
       cursor: pointer;
       opacity: 0;
-      transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+      transition: opacity 0.15s, color 0.15s;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
     }
 
     .bubble pre:hover .code-copy-btn { opacity: 1; }
-    .code-copy-btn:hover { color: var(--text); border-color: var(--secondary); }
-    .code-copy-btn.copied { color: var(--green); border-color: var(--green); }
+    .code-copy-btn:hover { color: var(--amber); border-color: var(--amber); }
+    .code-copy-btn.copied { color: var(--green); border-color: var(--green); opacity: 1; }
 
     .bubble pre code {
       background: none;
       border: none;
       padding: 0;
-      font-size: 0.85em;
-      color: #334155;
+      font-size: 0.84em;
+      color: var(--cream-2);
+      letter-spacing: 0;
     }
 
     .bubble table {
       border-collapse: collapse;
       width: 100%;
-      margin: 8px 0;
-      font-size: 0.85rem;
+      margin: 10px 0;
+      font-size: 0.84rem;
     }
 
     .bubble th, .bubble td {
       border: 1px solid var(--border);
-      padding: 7px 11px;
+      padding: 7px 12px;
       text-align: left;
     }
 
-    .bubble th { background: var(--primary-lt); color: var(--primary-dk); font-weight: 700; }
-    .bubble tr:nth-child(even) td { background: #FAFAF9; }
+    .bubble th {
+      background: var(--surface-2);
+      color: var(--amber-lt);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .bubble tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
 
     /* ── Copy button ── */
     .copy-btn {
       display: none;
       position: absolute;
-      top: 8px; right: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 9px;
-      font-size: 0.72rem;
-      font-family: inherit;
+      top: 6px; right: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border-lt);
+      padding: 3px 8px;
+      font-size: 0.65rem;
+      font-family: "Figtree", sans-serif;
       font-weight: 600;
       color: var(--muted);
       cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
+      transition: color 0.15s;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
       z-index: 1;
     }
 
     .bubble-wrap:hover .copy-btn { display: block; }
-    .copy-btn:hover { color: var(--text); border-color: var(--secondary); }
+    .copy-btn:hover { color: var(--amber); border-color: var(--amber); }
     .copy-btn.copied { color: var(--green); border-color: var(--green); }
 
     /* ── Context accordion ── */
     .ctx-toggle {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 600;
       color: var(--muted);
       cursor: pointer;
-      padding: 4px 4px 0;
+      padding: 6px 0 0 18px;
       user-select: none;
       transition: color 0.15s;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
     }
 
-    .ctx-toggle:hover { color: var(--primary); }
+    .ctx-toggle:hover { color: var(--amber); }
 
-    .ctx-body { display: none; padding-top: 6px; }
+    .ctx-body { display: none; padding-top: 8px; padding-left: 18px; }
     .ctx-body.open { display: block; }
 
     .chunk {
-      border-left: 2px solid var(--border);
-      padding: 5px 10px;
-      margin-bottom: 6px;
-      font-size: 0.76rem;
-      color: var(--muted);
-      line-height: 1.5;
-      border-radius: 0 4px 4px 0;
+      border-left: 1px solid var(--border-lt);
+      padding: 5px 12px;
+      margin-bottom: 8px;
+      font-size: 0.75rem;
+      color: var(--muted-lt);
+      line-height: 1.6;
     }
 
     .chunk-meta {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 600;
-      color: var(--secondary);
-      margin-bottom: 2px;
+      color: var(--amber);
+      margin-bottom: 3px;
+      letter-spacing: 0.2px;
+      opacity: 0.7;
     }
 
     /* ── Input bar ── */
     #input-bar {
       width: 100%;
-      max-width: 820px;
-      padding: 10px 20px 20px;
+      max-width: 860px;
+      padding: 8px 24px 24px;
       flex-shrink: 0;
     }
 
-    .input-row {
+    /* Filter indicator */
+    #filter-indicator {
+      font-size: 0.7rem;
+      color: var(--amber);
+      font-weight: 600;
+      padding: 0 2px 8px;
+      letter-spacing: 0.2px;
+    }
+
+    .input-shell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: 2px solid var(--amber);
+      padding: 12px 12px 12px 18px;
       display: flex;
       align-items: flex-end;
-      gap: 8px;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 10px 10px 10px 16px;
+      gap: 10px;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .input-row:focus-within {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    /* amber glow on focus */
+    .input-shell:focus-within {
+      border-color: var(--border-lt);
+      border-bottom-color: var(--amber-lt);
+      box-shadow: 0 4px 24px rgba(207, 154, 69, 0.08);
+    }
+
+    .input-row {
+      display: contents;
     }
 
     textarea {
       flex: 1;
       background: transparent;
       border: none;
-      color: var(--text);
-      font-size: 0.93rem;
-      font-family: inherit;
+      color: var(--cream);
+      font-size: 0.92rem;
+      font-family: "Figtree", sans-serif;
       outline: none;
       resize: none;
-      line-height: 1.5;
-      max-height: 140px;
+      line-height: 1.6;
+      max-height: 130px;
       overflow-y: auto;
     }
 
-    textarea::placeholder { color: #A5B4FC; }
+    textarea::placeholder { color: var(--muted); }
+    textarea::-webkit-scrollbar { width: 2px; }
+    textarea::-webkit-scrollbar-thumb { background: var(--border-lt); }
 
     #ask-btn {
-      background: var(--primary);
-      color: #fff;
+      width: 36px;
+      height: 36px;
+      background: var(--amber);
       border: none;
-      border-radius: 10px;
-      width: 38px; height: 38px;
-      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: background 0.15s, opacity 0.2s;
       flex-shrink: 0;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.2s;
     }
 
-    #ask-btn:hover    { background: var(--primary-dk); }
-    #ask-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    #ask-btn:hover {
+      background: var(--amber-lt);
+      box-shadow: 0 0 0 4px var(--amber-dim);
+    }
 
-    #ask-btn svg { width: 16px; height: 16px; fill: #fff; }
+    #ask-btn:active { transform: scale(0.93); }
+
+    #ask-btn:disabled {
+      background: var(--border-lt);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #ask-btn svg { width: 15px; height: 15px; fill: var(--bg); flex-shrink: 0; }
 
     /* status colours */
     .ok   { color: var(--green); }
     .err  { color: var(--red); }
-    .info { color: var(--secondary); }
+    .info { color: var(--muted-lt); }
 
-    /* Spinner */
+    /* Spinner — amber version */
     .spinner {
       display: inline-block;
-      width: 13px; height: 13px;
-      border: 2px solid var(--border);
-      border-top-color: var(--primary);
+      width: 12px; height: 12px;
+      border: 1.5px solid var(--border-lt);
+      border-top-color: var(--amber);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin 0.65s linear infinite;
       vertical-align: middle;
-      margin-right: 6px;
+      margin-right: 7px;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Empty state */
+    /* ── Empty state ── */
     #empty-state {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 14px;
       pointer-events: none;
+      animation: fadeUp 0.5s 0.15s ease-out both;
+    }
+
+    /* Large Fraunces italic wordmark */
+    #empty-state .es-wordmark {
+      font-family: "Fraunces", serif;
+      font-size: 3.5rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--border-lt);
+      letter-spacing: -1px;
+      line-height: 1;
+      user-select: none;
     }
 
     #empty-state .es-icon {
-      width: 56px;
-      height: 56px;
-      background: var(--primary-lt);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: none; /* hide icon in static version, use wordmark instead */
     }
 
-    #empty-state .es-icon svg { width: 26px; height: 26px; stroke: var(--primary); fill: none; }
-
     #empty-state h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--muted-lt);
+      letter-spacing: -0.2px;
     }
 
     #empty-state p {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--muted);
       text-align: center;
-      max-width: 300px;
-      line-height: 1.6;
+      max-width: 280px;
+      line-height: 1.7;
     }
 
-    /* Divider line below header */
-    .header-divider {
-      width: 100%;
-      max-width: 820px;
+    /* Horizontal divider in empty state */
+    #empty-state .es-divider {
+      width: 32px;
       height: 1px;
-      background: var(--border);
-      margin-top: 14px;
-      flex-shrink: 0;
+      background: var(--border-lt);
+    }
+
+    /* When JS re-creates the empty state, fall back gracefully */
+    #empty-state .es-icon svg { width: 24px; height: 24px; opacity: 0.3; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      header, #upload-bar, #doc-pills, #doc-pills-label, #chat, #input-bar {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      .msg-row.user .bubble-wrap { max-width: 85%; }
+      #empty-state .es-wordmark { font-size: 2.5rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .msg-row { animation: none; }
-      * { transition: none !important; }
+      .msg-row, #empty-state, header, #upload-bar { animation: none; }
+      #drop-zone.dragover { animation: none; }
+      * { transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
@@ -610,32 +856,41 @@
 <!-- Header -->
 <header>
   <div class="logo">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-    </div>
-    Smart<span>Docs</span> AI
-    <span class="logo-sub">RAG · Gemini 2.5</span>
+    <div class="logo-mark"><span>SD</span></div>
+    <span class="logo-text">Smart<em>Docs</em> AI</span>
+    <span class="logo-badge">Gemini 2.5</span>
   </div>
+
   <button id="api-key-btn" title="Set API key">
-    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+    </svg>
     API Key
   </button>
+
   <button id="new-chat-btn">
-    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
     New Chat
   </button>
 </header>
-<div class="header-divider"></div>
 
 <!-- Upload bar -->
 <div id="upload-bar">
   <div id="drop-zone">
     <div class="dz-icon">
-      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+      <svg viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
     </div>
     <div class="dz-label">
-      <strong id="dz-filename">Attach a PDF to get started</strong>
-      Drag & drop or click to upload
+      <strong id="dz-filename">Drop a PDF here, or click to upload</strong>
+      Supports PDF · Powered by FAISS vector search
     </div>
     <span id="upload-status"></span>
     <input type="file" id="file-input" accept=".pdf" />
@@ -643,33 +898,53 @@
 </div>
 
 <!-- Document pills -->
-<div id="doc-pills-label" style="display:none">Filter by document:</div>
+<div id="doc-pills-label" style="display:none">Filter context</div>
 <div id="doc-pills"></div>
 
 <!-- Chat -->
 <div id="chat">
   <div id="empty-state">
-    <div class="es-icon">
-      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-    </div>
-    <h3>Ask anything about your documents</h3>
-    <p>Upload a PDF and start asking questions — or just chat with the AI directly.</p>
+    <div class="es-wordmark">Ask.</div>
+    <div class="es-divider"></div>
+    <h3>What do you want to know?</h3>
+    <p>Upload a PDF and interrogate it — or ask the AI anything directly.</p>
   </div>
 </div>
 
 <!-- Input -->
 <div id="input-bar">
-  <div id="filter-indicator" style="display:none; font-size:0.73rem; color:var(--primary); font-weight:600; padding:0 4px 6px; display:none; align-items:center; gap:5px;">
-    <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+  <div id="filter-indicator" style="display:none">
+    <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
     <span id="filter-indicator-text"></span>
   </div>
-  <div class="input-row">
-    <textarea id="question-input" rows="1" placeholder="Ask a question about your documents…"></textarea>
-    <button id="ask-btn" title="Send">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+  <div class="input-shell">
+    <div class="input-row">
+      <textarea id="question-input" rows="1" placeholder="Ask a question about your documents…"></textarea>
+      <button id="ask-btn" title="Send">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- API Key Modal -->
+<div id="apikey-overlay">
+  <div id="apikey-modal">
+    <h3>
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
       </svg>
-    </button>
+      API Key
+    </h3>
+    <p>Enter your API key to authenticate requests. Leave blank and save to clear the stored key.</p>
+    <input id="apikey-input" type="password" placeholder="Enter API key…" autocomplete="off" spellcheck="false" />
+    <div class="apikey-actions">
+      <button id="apikey-clear">Clear key</button>
+      <button id="apikey-cancel">Cancel</button>
+      <button id="apikey-save">Save</button>
+    </div>
   </div>
 </div>
 
@@ -720,13 +995,43 @@
 
   loadDocuments();
 
-  // ── API Key button ───────────────────────────────────────
-  document.getElementById("api-key-btn").addEventListener("click", () => {
-    const current = getApiKey();
-    const val = prompt("Enter your API key (leave blank to clear):", current);
-    if (val === null) return;
-    if (val.trim()) { localStorage.setItem("smartdocs_api_key", val.trim()); }
-    else            { localStorage.removeItem("smartdocs_api_key"); }
+  // ── API Key modal ─────────────────────────────────────────
+  const apikeyOverlay = document.getElementById("apikey-overlay");
+  const apikeyInput   = document.getElementById("apikey-input");
+
+  function openApikeyModal() {
+    apikeyInput.value = getApiKey();
+    apikeyOverlay.classList.add("open");
+    setTimeout(() => apikeyInput.focus(), 50);
+  }
+  function closeApikeyModal() {
+    apikeyOverlay.classList.remove("open");
+  }
+
+  document.getElementById("api-key-btn").addEventListener("click", openApikeyModal);
+
+  document.getElementById("apikey-save").addEventListener("click", () => {
+    const val = apikeyInput.value.trim();
+    if (val) { localStorage.setItem("smartdocs_api_key", val); }
+    else     { localStorage.removeItem("smartdocs_api_key"); }
+    closeApikeyModal();
+  });
+
+  document.getElementById("apikey-clear").addEventListener("click", () => {
+    localStorage.removeItem("smartdocs_api_key");
+    apikeyInput.value = "";
+    closeApikeyModal();
+  });
+
+  document.getElementById("apikey-cancel").addEventListener("click", closeApikeyModal);
+
+  apikeyOverlay.addEventListener("click", (e) => {
+    if (e.target === apikeyOverlay) closeApikeyModal();
+  });
+
+  apikeyInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("apikey-save").click();
+    if (e.key === "Escape") closeApikeyModal();
   });
 
   // ── New Chat ─────────────────────────────────────────────
@@ -1071,7 +1376,7 @@
     if (chunks && chunks.length > 0) {
       const toggle = document.createElement("div");
       toggle.className = "ctx-toggle";
-      toggle.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg> ${chunks.length} source chunk${chunks.length > 1 ? "s" : ""}`;
+      toggle.innerHTML = `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg> ${chunks.length} source chunk${chunks.length > 1 ? "s" : ""}`;
 
       const body = document.createElement("div");
       body.className = "ctx-body";
@@ -1087,7 +1392,7 @@
 
       toggle.addEventListener("click", () => {
         const open = body.classList.toggle("open");
-        toggle.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="${open ? "18 15 12 9 6 15" : "9 18 15 12 9 6"}"/></svg> ${chunks.length} source chunk${chunks.length > 1 ? "s" : ""}`;
+        toggle.innerHTML = `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="${open ? "18 15 12 9 6 15" : "9 18 15 12 9 6"}"/></svg> ${chunks.length} source chunk${chunks.length > 1 ? "s" : ""}`;
         scrollToBottom();
       });
 
@@ -1109,6 +1414,7 @@
       .replace(/>/g, "&gt;");
   }
 </script>
+
 
 </body>
 </html>
