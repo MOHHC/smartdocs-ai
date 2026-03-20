@@ -110,7 +110,7 @@ The app is deployed at: [smartdocs-ai.up.railway.app](https://smartdocs-ai.up.ra
 
 ## Screenshots
 
-![SmartDocs AI](docs/screenshot.png)
+![SmartDocs AI](docs/screenshot.png?v=2)
 
 ---
 
